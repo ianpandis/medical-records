@@ -2,24 +2,25 @@
 CREATE TABLE public.patients (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  lastname TEXT NOT NULL,
-  date_of_birth DATE NOT NULL,
-  document TEXT NOT NULL,
-  phone TEXT,
+  documento INTEGER NOT NULL,
+  tipo_documento TEXT NOT NULL CHECK (tipo_documento IN ('DNI', 'LE', 'LC')),
+  numero_tramite INTEGER NOT NULL,
+  nombre_completo TEXT NOT NULL,
+  fecha_nacimiento DATE NOT NULL,
+  telefono TEXT,
   email TEXT,
-  address TEXT,
+  direccion TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
 -- Create consultations table
-CREATE TABLE public.consultations (
+CREATE TABLE public.consultas (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   patient_id UUID NOT NULL REFERENCES public.patients(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  date DATE NOT NULL,
-  notes TEXT NOT NULL,
+  fecha DATE NOT NULL,
+  notas TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
@@ -36,7 +37,7 @@ CREATE TABLE public.profiles (
 
 -- Enable Row Level Security
 ALTER TABLE public.patients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.consultas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for patients
@@ -62,22 +63,22 @@ USING (auth.uid() = user_id);
 
 -- Create RLS policies for consultations
 CREATE POLICY "Users can view consultations for their patients" 
-ON public.consultations 
+ON public.consultas 
 FOR SELECT 
 USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can create consultations for their patients" 
-ON public.consultations 
+ON public.consultas 
 FOR INSERT 
 WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update consultations for their patients" 
-ON public.consultations 
+ON public.consultas 
 FOR UPDATE 
 USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete consultations for their patients" 
-ON public.consultations 
+ON public.consultas 
 FOR DELETE 
 USING (auth.uid() = user_id);
 
@@ -112,8 +113,8 @@ CREATE TRIGGER update_patients_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
-CREATE TRIGGER update_consultations_updated_at
-  BEFORE UPDATE ON public.consultations
+CREATE TRIGGER update_consultas_updated_at
+  BEFORE UPDATE ON public.consultas
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
@@ -132,15 +133,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Create trigger for automatic profile creation
+-- Create trigger for new user profiles
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Create indexes for better performance
 CREATE INDEX idx_patients_user_id ON public.patients(user_id);
-CREATE INDEX idx_patients_document ON public.patients(document);
-CREATE INDEX idx_consultations_patient_id ON public.consultations(patient_id);
-CREATE INDEX idx_consultations_user_id ON public.consultations(user_id);
-CREATE INDEX idx_consultations_date ON public.consultations(date);
+CREATE INDEX idx_patients_documento ON public.patients(documento);
+CREATE INDEX idx_consultas_patient_id ON public.consultas(patient_id);
+CREATE INDEX idx_consultas_user_id ON public.consultas(user_id);
+CREATE INDEX idx_consultas_fecha ON public.consultas(fecha);

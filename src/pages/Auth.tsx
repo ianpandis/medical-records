@@ -20,9 +20,9 @@ const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Medical Records System</CardTitle>
+          <CardTitle className="text-2xl">Sistema de Consultas Medicas</CardTitle>
           <CardDescription>
-            Sign in to access patient management
+            Inicia sesión para acceder al sistema de consultas médicas
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -41,8 +41,8 @@ const AuthPage = () => {
               }
             }}
             providers={['google']}
-            redirectTo={`${window.location.origin}/`}
-            onlyThirdPartyProviders={false}
+            redirectTo={`http://localhost:8080/`}
+            onlyThirdPartyProviders={true}
           />
         </CardContent>
       </Card>

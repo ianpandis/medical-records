@@ -12,15 +12,17 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface Patient {
   id: string;
-  name: string;
-  lastname: string;
-  date_of_birth: string;
-  document: string;
-  phone?: string;
-  email?: string;
-  address?: string;
+  documento: number;
+  tipo_documento: 'DNI' | 'LE' | 'LC';
+  numero_tramite: number;
+  nombre_completo: string;
+  fecha_nacimiento: string;
+  telefono: string | null;
+  email: string | null;
+  direccion: string | null;
   created_at: string;
   updated_at: string;
+  user_id: string;
 }
 
 const Dashboard = () => {
@@ -40,15 +42,15 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('patients')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('nombre_completo', { ascending: true });
 
       if (error) throw error;
-      setPatients(data || []);
+      setPatients((data || []) as Patient[]);
     } catch (error) {
-      console.error('Error fetching patients:', error);
+      console.error('Error trayendo pacientes:', error);
       toast({
         title: "Error",
-        description: "Failed to load patients",
+        description: "No se pudo cargar la lista de pacientes",
         variant: "destructive",
       });
     } finally {
@@ -57,16 +59,16 @@ const Dashboard = () => {
   };
 
   const filteredPatients = patients.filter(patient =>
-    `${patient.name} ${patient.lastname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.document.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.documento.toString().includes(searchTerm)
   );
 
   const handlePatientAdded = () => {
     fetchPatients();
     setShowAddPatient(false);
     toast({
-      title: "Success",
-      description: "Patient added successfully",
+      title: "Éxito",
+      description: "Paciente agregado correctamente",
     });
   };
 
@@ -74,7 +76,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Medical Records System</h1>
+          <h1 className="text-2xl font-bold">Sistema de Registros Médicos</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
@@ -82,7 +84,7 @@ const Dashboard = () => {
             </div>
             <Button variant="outline" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
+              Cerrar sesión
             </Button>
           </div>
         </div>
@@ -92,9 +94,9 @@ const Dashboard = () => {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Patient Management</CardTitle>
+              <CardTitle>Gestión de Pacientes</CardTitle>
               <CardDescription>
-                Search for existing patients or add new ones
+                Busca pacientes existentes o agrega nuevos
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -102,7 +104,7 @@ const Dashboard = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search patients by name or document..."
+                    placeholder="Buscar pacientes por nombre o documento..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -112,12 +114,12 @@ const Dashboard = () => {
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Patient
+                      Agregar Paciente
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Add New Patient</DialogTitle>
+                      <DialogTitle>Agregar Nuevo Paciente</DialogTitle>
                     </DialogHeader>
                     <PatientForm onSuccess={handlePatientAdded} />
                   </DialogContent>

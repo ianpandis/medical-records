@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Edit, Trash2, FileText } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ConsultationForm } from '@/components/ConsultationForm';
@@ -28,22 +28,22 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
     setDeletingId(id);
     try {
       const { error } = await supabase
-        .from('consultations')
+        .from('consultas')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
       
       toast({
-        title: "Success",
-        description: "Consultation deleted successfully",
+        title: "Éxito",
+        description: "Consulta eliminada correctamente",
       });
       onConsultationUpdated();
     } catch (error: any) {
-      console.error('Error deleting consultation:', error);
+      console.error('Error eliminando consulta:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to delete consultation",
+        description: error.message || "No se pudo eliminar la consulta",
         variant: "destructive",
       });
     } finally {
@@ -61,8 +61,8 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
     setEditingConsultation(null);
     onConsultationUpdated();
     toast({
-      title: "Success",
-      description: "Consultation updated successfully",
+      title: "Éxito",
+      description: "Consulta actualizada correctamente",
     });
   };
 
@@ -89,7 +89,7 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
       <Card>
         <CardContent className="py-8 text-center">
           <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No consultations recorded yet</p>
+          <p className="text-muted-foreground">No hay consultas registradas</p>
         </CardContent>
       </Card>
     );
@@ -105,13 +105,8 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
                 <div>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {format(new Date(consultation.date), 'MMMM dd, yyyy')}
+                    {format(parseISO(consultation.fecha), 'dd/MM/yyyy')}
                   </CardTitle>
-                  <CardDescription>
-                    <Badge variant="secondary">
-                      {format(new Date(consultation.created_at), 'MMM dd, yyyy - HH:mm')}
-                    </Badge>
-                  </CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -133,18 +128,18 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Consultation</AlertDialogTitle>
+                        <AlertDialogTitle>Eliminar Consulta</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete this consultation? This action cannot be undone.
+                          ¿Está seguro de querer eliminar esta consulta? Esta acción no puede ser deshecha.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(consultation.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Delete
+                          Eliminar
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -154,7 +149,7 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {consultation.notes}
+                {consultation.notas}
               </p>
             </CardContent>
           </Card>
@@ -164,15 +159,15 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Consultation</DialogTitle>
+            <DialogTitle>Editar Consulta</DialogTitle>
           </DialogHeader>
           {editingConsultation && (
             <ConsultationForm
               patientId={editingConsultation.patient_id}
               onSuccess={handleEditSuccess}
               initialData={{
-                date: editingConsultation.date,
-                notes: editingConsultation.notes,
+                fecha: editingConsultation.fecha,
+                notas: editingConsultation.notas,
               }}
               consultationId={editingConsultation.id}
             />

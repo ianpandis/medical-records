@@ -11,12 +11,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 const patientSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  lastname: z.string().min(1, 'Last name is required'),
-  date_of_birth: z.string().min(1, 'Date of birth is required'),
-  document: z.string().min(1, 'Document is required'),
+  name: z.string().min(1, 'El nombre es requerido'),
+  lastname: z.string().min(1, 'El apellido es requerido'),
+  date_of_birth: z.string().min(1, 'La fecha de nacimiento es requerida'),
+  document: z.string().min(1, 'El documento es requerido'),
+  tipo_documento: z.enum(['DNI', 'LE', 'LC'], { required_error: 'El tipo de documento es requerido' }),
+  numero_tramite: z.string().min(1, 'El número de trámite es requerido'),
   phone: z.string().optional(),
-  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().optional(),
 });
 
@@ -48,14 +50,15 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
     setLoading(true);
     try {
       const patientData = {
-        name: data.name,
-        lastname: data.lastname,
-        date_of_birth: data.date_of_birth,
-        document: data.document,
+        nombre_completo: `${data.name} ${data.lastname}`,
+        documento: parseInt(data.document),
+        tipo_documento: data.tipo_documento,
+        numero_tramite: parseInt(data.numero_tramite),
+        fecha_nacimiento: data.date_of_birth,
         user_id: user.id,
         email: data.email || null,
-        phone: data.phone || null,
-        address: data.address || null,
+        telefono: data.phone || null,
+        direccion: data.address || null,
       };
 
       if (patientId) {
@@ -67,8 +70,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Patient updated successfully",
+          title: "Éxito",
+          description: "Paciente actualizado correctamente",
         });
       } else {
         // Create new patient
@@ -78,8 +81,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Patient created successfully",
+          title: "Éxito",
+          description: "Paciente creado correctamente",
         });
       }
 
@@ -88,7 +91,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
       console.error('Error saving patient:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save patient",
+        description: error.message || "Error al guardar el paciente",
         variant: "destructive",
       });
     } finally {
@@ -100,7 +103,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="name">Name *</Label>
+          <Label htmlFor="name">Nombre *</Label>
           <Input
             id="name"
             {...register('name')}
@@ -112,7 +115,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="lastname">Last Name *</Label>
+          <Label htmlFor="lastname">Apellido *</Label>
           <Input
             id="lastname"
             {...register('lastname')}
@@ -124,7 +127,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="date_of_birth">Date of Birth *</Label>
+          <Label htmlFor="date_of_birth">Fecha de Nacimiento *</Label>
           <Input
             id="date_of_birth"
             type="date"
@@ -137,7 +140,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="document">Document ID *</Label>
+          <Label htmlFor="document">Número de Documento *</Label>
           <Input
             id="document"
             {...register('document')}
@@ -149,7 +152,36 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="tipo_documento">Tipo de Documento *</Label>
+          <select
+            id="tipo_documento"
+            {...register('tipo_documento')}
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.tipo_documento ? 'border-destructive' : ''}`}
+          >
+            <option value="">Seleccionar tipo de documento</option>
+            <option value="DNI">DNI</option>
+            <option value="LE">LE</option>
+            <option value="LC">LC</option>
+          </select>
+          {errors.tipo_documento && (
+            <p className="text-sm text-destructive mt-1">{errors.tipo_documento.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="numero_tramite">Número de Trámite *</Label>
+          <Input
+            id="numero_tramite"
+            {...register('numero_tramite')}
+            className={errors.numero_tramite ? 'border-destructive' : ''}
+          />
+          {errors.numero_tramite && (
+            <p className="text-sm text-destructive mt-1">{errors.numero_tramite.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="phone">Teléfono</Label>
           <Input
             id="phone"
             {...register('phone')}
@@ -171,7 +203,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
       </div>
 
       <div>
-        <Label htmlFor="address">Address</Label>
+        <Label htmlFor="address">Dirección</Label>
         <Textarea
           id="address"
           {...register('address')}
@@ -181,7 +213,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
 
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : patientId ? 'Update Patient' : 'Add Patient'}
+          {loading ? 'Guardando...' : patientId ? 'Actualizar Paciente' : 'Agregar Paciente'}
         </Button>
       </div>
     </form>

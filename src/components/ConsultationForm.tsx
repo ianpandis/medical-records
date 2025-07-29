@@ -11,8 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 const consultationSchema = z.object({
-  date: z.string().min(1, 'Date is required'),
-  notes: z.string().min(1, 'Notes are required'),
+  fecha: z.string().min(1, 'Fecha es requerida'),
+  notas: z.string().min(1, 'Notas son requeridas'),
 });
 
 type ConsultationFormData = z.infer<typeof consultationSchema>;
@@ -35,8 +35,9 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
     formState: { errors },
   } = useForm<ConsultationFormData>({
     resolver: zodResolver(consultationSchema),
-    defaultValues: initialData || {
-      date: new Date().toISOString().split('T')[0],
+    defaultValues: {
+      fecha: initialData?.fecha ? new Date(initialData.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      notas: initialData?.notas || '',
     },
   });
 
@@ -46,8 +47,8 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
     setLoading(true);
     try {
       const consultationData = {
-        date: data.date,
-        notes: data.notes,
+        fecha: data.fecha,
+        notas: data.notas,
         patient_id: patientId,
         user_id: user.id,
       };
@@ -55,7 +56,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
       if (consultationId) {
         // Update existing consultation
         const { error } = await supabase
-          .from('consultations')
+          .from('consultas')
           .update(consultationData)
           .eq('id', consultationId);
 
@@ -63,7 +64,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
       } else {
         // Create new consultation
         const { error } = await supabase
-          .from('consultations')
+          .from('consultas')
           .insert(consultationData);
 
         if (error) throw error;
@@ -74,7 +75,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
       console.error('Error saving consultation:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save consultation",
+        description: error.message || "Error al guardar la consulta",
         variant: "destructive",
       });
     } finally {
@@ -85,35 +86,35 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <Label htmlFor="date">Consultation Date *</Label>
+        <Label htmlFor="fecha">Fecha de la consulta *</Label>
         <Input
-          id="date"
+          id="fecha"
           type="date"
-          {...register('date')}
-          className={errors.date ? 'border-destructive' : ''}
+          {...register('fecha')}
+          className={errors.fecha ? 'border-destructive' : ''}
         />
-        {errors.date && (
-          <p className="text-sm text-destructive mt-1">{errors.date.message}</p>
+        {errors.fecha && (
+          <p className="text-sm text-destructive mt-1">{errors.fecha.message}</p>
         )}
       </div>
 
       <div>
-        <Label htmlFor="notes">Notes *</Label>
+        <Label htmlFor="notes">Notas *</Label>
         <Textarea
-          id="notes"
-          {...register('notes')}
+          id="notas"
+          {...register('notas')}
           rows={6}
-          placeholder="Enter consultation notes, diagnosis, treatment, recommendations..."
-          className={errors.notes ? 'border-destructive' : ''}
+          placeholder="Ingrese las notas de la consulta, diagnóstico, tratamiento, recomendaciones..."
+          className={errors.notas ? 'border-destructive' : ''}
         />
-        {errors.notes && (
-          <p className="text-sm text-destructive mt-1">{errors.notes.message}</p>
+        {errors.notas && (
+          <p className="text-sm text-destructive mt-1">{errors.notas.message}</p>
         )}
       </div>
 
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : consultationId ? 'Update Consultation' : 'Add Consultation'}
+          {loading ? 'Guardando...' : consultationId ? 'Actualizar Consulta' : 'Agregar Consulta'}
         </Button>
       </div>
     </form>

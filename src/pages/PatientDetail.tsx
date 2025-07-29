@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Edit, Plus, Calendar, Phone, Mail, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Patient } from '@/pages/Dashboard';
@@ -17,8 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 export interface Consultation {
   id: string;
   patient_id: string;
-  date: string;
-  notes: string;
+  fecha: string;
+  notas: string;
   created_at: string;
   updated_at: string;
 }
@@ -50,12 +50,12 @@ const PatientDetail = () => {
         .single();
 
       if (error) throw error;
-      setPatient(data);
+      setPatient(data as Patient);
     } catch (error: any) {
       console.error('Error fetching patient:', error);
       toast({
         title: "Error",
-        description: "Failed to load patient details",
+        description: "No se pudo cargar los detalles del paciente",
         variant: "destructive",
       });
       navigate('/');
@@ -67,10 +67,10 @@ const PatientDetail = () => {
   const fetchConsultations = async () => {
     try {
       const { data, error } = await supabase
-        .from('consultations')
+        .from('consultas')
         .select('*')
         .eq('patient_id', id)
-        .order('date', { ascending: false });
+        .order('fecha', { ascending: false });
 
       if (error) throw error;
       setConsultations(data || []);
@@ -78,7 +78,7 @@ const PatientDetail = () => {
       console.error('Error fetching consultations:', error);
       toast({
         title: "Error",
-        description: "Failed to load consultations",
+        description: "No se pudo cargar las consultas",
         variant: "destructive",
       });
     } finally {
@@ -90,8 +90,8 @@ const PatientDetail = () => {
     fetchPatient();
     setShowEditPatient(false);
     toast({
-      title: "Success",
-      description: "Patient updated successfully",
+      title: "Éxito",
+      description: "Paciente actualizado correctamente",
     });
   };
 
@@ -99,8 +99,8 @@ const PatientDetail = () => {
     fetchConsultations();
     setShowAddConsultation(false);
     toast({
-      title: "Success",
-      description: "Consultation added successfully",
+      title: "Éxito",
+      description: "Consulta agregada correctamente",
     });
   };
 
@@ -127,9 +127,9 @@ const PatientDetail = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground">Patient not found</p>
+            <p className="text-muted-foreground">Paciente no encontrado</p>
             <Button onClick={() => navigate('/')} className="mt-4">
-              Go Back
+              Volver
             </Button>
           </CardContent>
         </Card>
@@ -147,47 +147,49 @@ const PatientDetail = () => {
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Volver al Panel
           </Button>
-          <h1 className="text-2xl font-bold">Patient Details</h1>
+          <h1 className="text-2xl font-bold">Detalles del Paciente</h1>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          {/* Patient Information */}
+          {/* Información del Paciente */}
           <Card>
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-xl">
-                    {patient.name} {patient.lastname}
+                    {patient.nombre_completo}
                   </CardTitle>
                   <CardDescription>
-                    <Badge variant="outline">ID: {patient.document}</Badge>
+                    <Badge variant="outline">Documento: {patient.documento} ({patient.tipo_documento})</Badge>
                   </CardDescription>
                 </div>
                 <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
                   <DialogTrigger asChild>
                     <Button variant="outline">
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit Patient
+                      Editar Paciente
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Edit Patient</DialogTitle>
+                      <DialogTitle>Editar Paciente</DialogTitle>
                     </DialogHeader>
                     <PatientForm 
                       onSuccess={handlePatientUpdated}
                       initialData={{
-                        name: patient.name,
-                        lastname: patient.lastname,
-                        date_of_birth: patient.date_of_birth,
-                        document: patient.document,
-                        phone: patient.phone || '',
+                        name: patient.nombre_completo.split(' ')[0] || '',
+                        lastname: patient.nombre_completo.split(' ').slice(1).join(' ') || '',
+                        date_of_birth: patient.fecha_nacimiento,
+                        document: patient.documento.toString(),
+                        tipo_documento: patient.tipo_documento,
+                        numero_tramite: patient.numero_tramite.toString(),
+                        phone: patient.telefono || '',
                         email: patient.email || '',
-                        address: patient.address || '',
+                        address: patient.direccion || '',
                       }}
                       patientId={patient.id}
                     />
@@ -199,12 +201,12 @@ const PatientDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>Born: {format(new Date(patient.date_of_birth), 'MMMM dd, yyyy')}</span>
+                  <span>Fecha de nacimiento: {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}</span>
                 </div>
-                {patient.phone && (
+                {patient.telefono && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.phone}</span>
+                    <span>{patient.telefono}</span>
                   </div>
                 )}
                 {patient.email && (
@@ -213,36 +215,36 @@ const PatientDetail = () => {
                     <span>{patient.email}</span>
                   </div>
                 )}
-                {patient.address && (
+                {patient.direccion && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.address}</span>
+                    <span>{patient.direccion}</span>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Consultations */}
+          {/* Consultas */}
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Medical Consultations</CardTitle>
+                  <CardTitle>Consultas Médicas</CardTitle>
                   <CardDescription>
-                    History of consultations for this patient
+                    Historial de consultas de este paciente
                   </CardDescription>
                 </div>
                 <Dialog open={showAddConsultation} onOpenChange={setShowAddConsultation}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      New Consultation
+                      Nueva Consulta
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Add New Consultation</DialogTitle>
+                      <DialogTitle>Agregar Nueva Consulta</DialogTitle>
                     </DialogHeader>
                     <ConsultationForm 
                       patientId={id!}
