@@ -10,6 +10,9 @@ const AuthPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Get the current origin (localhost in dev, production URL in prod)
+  const redirectUrl = window.location.origin + '/';
+
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -41,7 +44,7 @@ const AuthPage = () => {
               }
             }}
             providers={['google']}
-            redirectTo={`http://localhost:8080/`}
+            redirectTo={redirectUrl}
             onlyThirdPartyProviders={true}
           />
         </CardContent>
