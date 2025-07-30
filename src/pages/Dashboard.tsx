@@ -38,10 +38,13 @@ const Dashboard = () => {
   }, []);
 
   const fetchPatients = async () => {
+    if (!user?.id) return;
+    
     try {
       const { data, error } = await supabase
         .from('patients')
         .select('*')
+        .eq('user_id', user.id)
         .order('nombre_completo', { ascending: true });
 
       if (error) throw error;
