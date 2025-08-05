@@ -13,10 +13,12 @@ import { useAuth } from '@/hooks/useAuth';
 const patientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   lastname: z.string().min(1, 'El apellido es requerido'),
-  date_of_birth: z.string().min(1, 'La fecha de nacimiento es requerida'),
-  document: z.string().min(1, 'El documento es requerido'),
-  tipo_documento: z.enum(['DNI', 'LE', 'LC'], { required_error: 'El tipo de documento es requerido' }),
-  numero_tramite: z.string().min(1, 'El número de trámite es requerido'),
+  date_of_birth: z.string().optional(),
+  document: z.string().optional(),
+  tipo_documento: z.enum(['DNI', 'LE', 'LC']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
+  numero_tramite: z.string().optional(),
+  numero_afiliado: z.string().optional(),
+  obra_social: z.enum(['Pami', 'Ioma', 'Medife', 'Particular']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
   phone: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().optional(),
@@ -50,11 +52,14 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
     setLoading(true);
     try {
       const patientData = {
-        nombre_completo: `${data.name} ${data.lastname}`,
-        documento: parseInt(data.document),
-        tipo_documento: data.tipo_documento,
-        numero_tramite: parseInt(data.numero_tramite),
-        fecha_nacimiento: data.date_of_birth,
+        nombre: data.name,
+        apellido: data.lastname,
+        documento: data.document && data.document.trim() !== '' ? parseInt(data.document, 10) : null,
+        tipo_documento: data.tipo_documento || null,
+        numero_tramite: data.numero_tramite && data.numero_tramite.trim() !== '' ? parseInt(data.numero_tramite, 10) : null,
+        numero_afiliado: data.numero_afiliado && data.numero_afiliado.trim() !== '' ? parseInt(data.numero_afiliado, 10) : null,
+        obra_social: data.obra_social || null,
+        fecha_nacimiento: data.date_of_birth || null,
         user_id: user.id,
         email: data.email || null,
         telefono: data.phone || null,
@@ -127,7 +132,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="date_of_birth">Fecha de Nacimiento *</Label>
+          <Label htmlFor="date_of_birth">Fecha de Nacimiento</Label>
           <Input
             id="date_of_birth"
             type="date"
@@ -140,9 +145,10 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="document">Número de Documento *</Label>
+          <Label htmlFor="document">Número de Documento</Label>
           <Input
             id="document"
+            type="number"
             {...register('document')}
             className={errors.document ? 'border-destructive' : ''}
           />
@@ -152,7 +158,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="tipo_documento">Tipo de Documento *</Label>
+          <Label htmlFor="tipo_documento">Tipo de Documento</Label>
           <select
             id="tipo_documento"
             {...register('tipo_documento')}
@@ -169,14 +175,46 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="numero_tramite">Número de Trámite *</Label>
+          <Label htmlFor="numero_tramite">Número de Trámite</Label>
           <Input
             id="numero_tramite"
+            type="number"
             {...register('numero_tramite')}
             className={errors.numero_tramite ? 'border-destructive' : ''}
           />
           {errors.numero_tramite && (
             <p className="text-sm text-destructive mt-1">{errors.numero_tramite.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="numero_afiliado">Número de Afiliado</Label>
+          <Input
+            id="numero_afiliado"
+            type="number"
+            {...register('numero_afiliado')}
+            className={errors.numero_afiliado ? 'border-destructive' : ''}
+          />
+          {errors.numero_afiliado && (
+            <p className="text-sm text-destructive mt-1">{errors.numero_afiliado.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="obra_social">Obra Social</Label>
+          <select
+            id="obra_social"
+            {...register('obra_social')}
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.obra_social ? 'border-destructive' : ''}`}
+          >
+            <option value="">Seleccionar obra social</option>
+            <option value="Pami">Pami</option>
+            <option value="Ioma">Ioma</option>
+            <option value="Medife">Medife</option>
+            <option value="Particular">Particular</option>
+          </select>
+          {errors.obra_social && (
+            <p className="text-sm text-destructive mt-1">{errors.obra_social.message}</p>
           )}
         </div>
 

@@ -54,44 +54,53 @@ export type Database = {
       }
       patients: {
         Row: {
+          apellido: string
           created_at: string
           direccion: string | null
-          documento: number
+          documento: number | null
           email: string | null
-          fecha_nacimiento: string
+          fecha_nacimiento: string | null
           id: string
-          nombre_completo: string
-          numero_tramite: number
+          nombre: string
+          numero_afiliado: number | null
+          numero_tramite: number | null
+          obra_social: string | null
           telefono: string | null
-          tipo_documento: string
+          tipo_documento: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          apellido: string
           created_at?: string
           direccion?: string | null
-          documento: number
+          documento?: number | null
           email?: string | null
-          fecha_nacimiento: string
+          fecha_nacimiento?: string | null
           id?: string
-          nombre_completo: string
-          numero_tramite: number
+          nombre: string
+          numero_afiliado?: number | null
+          numero_tramite?: number | null
+          obra_social?: string | null
           telefono?: string | null
-          tipo_documento: string
+          tipo_documento?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          apellido?: string
           created_at?: string
           direccion?: string | null
-          documento?: number
+          documento?: number | null
           email?: string | null
-          fecha_nacimiento?: string
+          fecha_nacimiento?: string | null
           id?: string
-          nombre_completo?: string
-          numero_tramite?: number
+          nombre?: string
+          numero_afiliado?: number | null
+          numero_tramite?: number | null
+          obra_social?: string | null
           telefono?: string | null
-          tipo_documento?: string
+          tipo_documento?: string | null
           updated_at?: string
           user_id?: string
         }

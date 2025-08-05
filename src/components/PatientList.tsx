@@ -67,26 +67,43 @@ export const PatientList = ({ patients, loading, onPatientUpdated }: PatientList
         <Card key={patient.id} className="hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="text-lg">
-              {patient.nombre_completo}
+              {patient.apellido} {patient.nombre}
             </CardTitle>
     
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2">
+            {patient.documento && patient.tipo_documento && (
+              <div className="flex items-center gap-2">
                 <span>{patient.tipo_documento} - {patient.documento}</span>
               </div>
+            )}
+            {patient.numero_tramite && (
               <div className="flex items-center gap-2">
                 <span>Número de tramite: {patient.numero_tramite}</span>
               </div>
+            )}
+            {patient.numero_afiliado && (
+              <div className="flex items-center gap-2">
+                <span>Número de afiliado: {patient.numero_afiliado}</span>
+              </div>
+            )}
+            {patient.obra_social && (
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">{patient.obra_social}</Badge>
+              </div>
+            )}
+            {patient.fecha_nacimiento && (
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span>Fecha de nacimiento: {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}</span>
               </div>
+            )}
+            {patient.fecha_nacimiento && (
               <div className="flex items-center gap-2">
-                
                 <span className="ml-6 text-muted-foreground">Edad: {calcularEdad(patient.fecha_nacimiento)} años</span>
               </div>
+            )}
               {patient.telefono && (
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />

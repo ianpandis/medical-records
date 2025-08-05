@@ -12,11 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface Patient {
   id: string;
-  documento: number;
-  tipo_documento: 'DNI' | 'LE' | 'LC';
-  numero_tramite: number;
-  nombre_completo: string;
-  fecha_nacimiento: string;
+  documento: number | null;
+  tipo_documento: 'DNI' | 'LE' | 'LC' | null;
+  numero_tramite: number | null;
+  numero_afiliado: number | null;
+  obra_social: 'Pami' | 'Ioma' | 'Medife' | 'Particular' | null;
+  nombre: string;
+  apellido: string;
+  fecha_nacimiento: string | null;
   telefono: string | null;
   email: string | null;
   direccion: string | null;
@@ -45,7 +48,7 @@ const Dashboard = () => {
         .from('patients')
         .select('*')
         .eq('user_id', user.id)
-        .order('nombre_completo', { ascending: true });
+        .order('apellido', { ascending: true });
 
       if (error) throw error;
       setPatients((data || []) as Patient[]);
@@ -62,8 +65,10 @@ const Dashboard = () => {
   };
 
   const filteredPatients = patients.filter(patient =>
-    patient.nombre_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.documento.toString().includes(searchTerm)
+    `${patient.apellido} ${patient.nombre}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.documento?.toString().includes(searchTerm)
   );
 
   const handlePatientAdded = () => {

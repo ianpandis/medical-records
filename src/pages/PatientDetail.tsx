@@ -161,10 +161,17 @@ const PatientDetail = () => {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-xl">
-                    {patient.nombre_completo}
+                    {patient.apellido} {patient.nombre}
                   </CardTitle>
                   <CardDescription>
-                    <Badge variant="outline">Documento: {patient.documento} ({patient.tipo_documento})</Badge>
+                    <div className="flex flex-wrap gap-2">
+                      {patient.documento && patient.tipo_documento && (
+                        <Badge variant="outline">Documento: {patient.documento} ({patient.tipo_documento})</Badge>
+                      )}
+                      {patient.obra_social && (
+                        <Badge variant="secondary">{patient.obra_social}</Badge>
+                      )}
+                    </div>
                   </CardDescription>
                 </div>
                 <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
@@ -181,12 +188,14 @@ const PatientDetail = () => {
                     <PatientForm 
                       onSuccess={handlePatientUpdated}
                       initialData={{
-                        name: patient.nombre_completo.split(' ')[0] || '',
-                        lastname: patient.nombre_completo.split(' ').slice(1).join(' ') || '',
-                        date_of_birth: patient.fecha_nacimiento,
-                        document: patient.documento.toString(),
-                        tipo_documento: patient.tipo_documento,
-                        numero_tramite: patient.numero_tramite.toString(),
+                        name: patient.nombre || '',
+                        lastname: patient.apellido || '',
+                        date_of_birth: patient.fecha_nacimiento || '',
+                        document: patient.documento?.toString() || '',
+                        tipo_documento: patient.tipo_documento || undefined,
+                        numero_tramite: patient.numero_tramite?.toString() || '',
+                        numero_afiliado: patient.numero_afiliado?.toString() || '',
+                        obra_social: patient.obra_social || undefined,
                         phone: patient.telefono || '',
                         email: patient.email || '',
                         address: patient.direccion || '',
@@ -199,10 +208,22 @@ const PatientDetail = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>Fecha de nacimiento: {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}</span>
-                </div>
+                {patient.fecha_nacimiento && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Fecha de nacimiento: {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}</span>
+                  </div>
+                )}
+                {patient.numero_tramite && (
+                  <div className="flex items-center gap-2">
+                    <span>Número de trámite: {patient.numero_tramite}</span>
+                  </div>
+                )}
+                {patient.numero_afiliado && (
+                  <div className="flex items-center gap-2">
+                    <span>Número de afiliado: {patient.numero_afiliado}</span>
+                  </div>
+                )}
                 {patient.telefono && (
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
