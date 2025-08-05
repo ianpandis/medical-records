@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Plus, Calendar, Phone, Mail, MapPin } from 'lucide-react';
+import { ArrowLeft, Edit, Plus, Calendar, Phone, Mail, MapPin, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import { PatientForm } from '@/components/PatientForm';
 import { ConsultationList } from '@/components/ConsultationList';
 import { ConsultationForm } from '@/components/ConsultationForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export interface Consultation {
   id: string;
@@ -33,6 +34,7 @@ const PatientDetail = () => {
   const [consultationsLoading, setConsultationsLoading] = useState(true);
   const [showEditPatient, setShowEditPatient] = useState(false);
   const [showAddConsultation, setShowAddConsultation] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -102,6 +104,46 @@ const PatientDetail = () => {
       title: "Éxito",
       description: "Consulta agregada correctamente",
     });
+  };
+
+  const handleDeletePatient = async () => {
+    if (!patient?.id) return;
+    
+    setDeleteLoading(true);
+    try {
+      // Primero eliminar todas las consultas del paciente
+      const { error: consultationsError } = await supabase
+        .from('consultas')
+        .delete()
+        .eq('patient_id', patient.id);
+
+      if (consultationsError) throw consultationsError;
+
+      // Luego eliminar el paciente
+      const { error: patientError } = await supabase
+        .from('patients')
+        .delete()
+        .eq('id', patient.id);
+
+      if (patientError) throw patientError;
+
+      toast({
+        title: "Éxito",
+        description: "Paciente eliminado correctamente",
+      });
+
+      // Navegar de vuelta al dashboard
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error eliminando paciente:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Error al eliminar el paciente",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   if (loading) {
@@ -174,13 +216,14 @@ const PatientDetail = () => {
                     </div>
                   </CardDescription>
                 </div>
-                <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar Paciente
-                    </Button>
-                  </DialogTrigger>
+                <div className="flex gap-2">
+                  <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                    </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>Editar Paciente</DialogTitle>
@@ -204,7 +247,35 @@ const PatientDetail = () => {
                     />
                   </DialogContent>
                 </Dialog>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Eliminar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Esto eliminará permanentemente al paciente "{patient.apellido} {patient.nombre}" y todas sus consultas asociadas.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDeletePatient}
+                        disabled={deleteLoading}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteLoading ? "Eliminando..." : "Eliminar"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
+            </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
