@@ -20,6 +20,7 @@ export interface Consultation {
   patient_id: string;
   fecha: string;
   notas: string;
+  tipo: 'Primer Consulta' | 'Segunda Consulta' | 'Domicilio' | 'Espontanea' | null;
   created_at: string;
   updated_at: string;
 }
@@ -75,7 +76,7 @@ const PatientDetail = () => {
         .order('fecha', { ascending: false });
 
       if (error) throw error;
-      setConsultations(data || []);
+      setConsultations((data || []) as Consultation[]);
     } catch (error) {
       console.error('Error fetching consultations:', error);
       toast({
@@ -239,6 +240,7 @@ const PatientDetail = () => {
                         numero_tramite: patient.numero_tramite?.toString() || '',
                         numero_afiliado: patient.numero_afiliado?.toString() || '',
                         obra_social: patient.obra_social || undefined,
+                        localidad: patient.localidad || undefined,
                         phone: patient.telefono || '',
                         email: patient.email || '',
                         address: patient.direccion || '',
@@ -307,10 +309,16 @@ const PatientDetail = () => {
                     <span>{patient.email}</span>
                   </div>
                 )}
+                {patient.localidad && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>Localidad: {patient.localidad}</span>
+                  </div>
+                )}
                 {patient.direccion && (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.direccion}</span>
+                    <span>Dirección: {patient.direccion}</span>
                   </div>
                 )}
               </div>

@@ -19,6 +19,7 @@ const patientSchema = z.object({
   numero_tramite: z.string().optional(),
   numero_afiliado: z.string().optional(),
   obra_social: z.enum(['Pami', 'Ioma', 'Medife', 'Particular']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
+  localidad: z.enum(['Del Viso', 'Garin', 'Maquinista Savio', 'Pilar']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
   phone: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().optional(),
@@ -59,6 +60,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         numero_tramite: data.numero_tramite && data.numero_tramite.trim() !== '' ? parseInt(data.numero_tramite, 10) : null,
         numero_afiliado: data.numero_afiliado && data.numero_afiliado.trim() !== '' ? parseInt(data.numero_afiliado, 10) : null,
         obra_social: data.obra_social || null,
+        localidad: data.localidad || null,
         fecha_nacimiento: data.date_of_birth || null,
         user_id: user.id,
         email: data.email || null,
@@ -107,6 +109,17 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+          <Label htmlFor="lastname">Apellido *</Label>
+          <Input
+            id="lastname"
+            {...register('lastname')}
+            className={errors.lastname ? 'border-destructive' : ''}
+          />
+          {errors.lastname && (
+            <p className="text-sm text-destructive mt-1">{errors.lastname.message}</p>
+          )}
+        </div>
         <div>
           <Label htmlFor="name">Nombre *</Label>
           <Input
@@ -119,28 +132,18 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
           )}
         </div>
 
-        <div>
-          <Label htmlFor="lastname">Apellido *</Label>
-          <Input
-            id="lastname"
-            {...register('lastname')}
-            className={errors.lastname ? 'border-destructive' : ''}
-          />
-          {errors.lastname && (
-            <p className="text-sm text-destructive mt-1">{errors.lastname.message}</p>
-          )}
-        </div>
+    
 
         <div>
-          <Label htmlFor="date_of_birth">Fecha de Nacimiento</Label>
+          <Label htmlFor="numero_afiliado">Número de Afiliado</Label>
           <Input
-            id="date_of_birth"
-            type="date"
-            {...register('date_of_birth')}
-            className={errors.date_of_birth ? 'border-destructive' : ''}
+            id="numero_afiliado"
+            type="number"
+            {...register('numero_afiliado')}
+            className={errors.numero_afiliado ? 'border-destructive' : ''}
           />
-          {errors.date_of_birth && (
-            <p className="text-sm text-destructive mt-1">{errors.date_of_birth.message}</p>
+          {errors.numero_afiliado && (
+            <p className="text-sm text-destructive mt-1">{errors.numero_afiliado.message}</p>
           )}
         </div>
 
@@ -157,7 +160,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
           )}
         </div>
 
-        <div>
+    {/*     <div>
           <Label htmlFor="tipo_documento">Tipo de Documento</Label>
           <select
             id="tipo_documento"
@@ -172,7 +175,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
           {errors.tipo_documento && (
             <p className="text-sm text-destructive mt-1">{errors.tipo_documento.message}</p>
           )}
-        </div>
+        </div> */}
 
         <div>
           <Label htmlFor="numero_tramite">Número de Trámite</Label>
@@ -188,15 +191,15 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         </div>
 
         <div>
-          <Label htmlFor="numero_afiliado">Número de Afiliado</Label>
+          <Label htmlFor="date_of_birth">Fecha de Nacimiento</Label>
           <Input
-            id="numero_afiliado"
-            type="number"
-            {...register('numero_afiliado')}
-            className={errors.numero_afiliado ? 'border-destructive' : ''}
+            id="date_of_birth"
+            type="date"
+            {...register('date_of_birth')}
+            className={errors.date_of_birth ? 'border-destructive' : ''}
           />
-          {errors.numero_afiliado && (
-            <p className="text-sm text-destructive mt-1">{errors.numero_afiliado.message}</p>
+          {errors.date_of_birth && (
+            <p className="text-sm text-destructive mt-1">{errors.date_of_birth.message}</p>
           )}
         </div>
 
@@ -215,6 +218,24 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
           </select>
           {errors.obra_social && (
             <p className="text-sm text-destructive mt-1">{errors.obra_social.message}</p>
+          )}
+        </div>
+
+        <div>
+          <Label htmlFor="localidad">Localidad</Label>
+          <select
+            id="localidad"
+            {...register('localidad')}
+            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.localidad ? 'border-destructive' : ''}`}
+          >
+            <option value="">Seleccionar localidad</option>
+            <option value="Del Viso">Del Viso</option>
+            <option value="Garin">Garin</option>
+            <option value="Maquinista Savio">Maquinista Savio</option>
+            <option value="Pilar">Pilar</option>
+          </select>
+          {errors.localidad && (
+            <p className="text-sm text-destructive mt-1">{errors.localidad.message}</p>
           )}
         </div>
 
@@ -242,10 +263,9 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
 
       <div>
         <Label htmlFor="address">Dirección</Label>
-        <Textarea
+        <Input
           id="address"
           {...register('address')}
-          rows={3}
         />
       </div>
 

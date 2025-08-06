@@ -17,6 +17,7 @@ export interface Patient {
   numero_tramite: number | null;
   numero_afiliado: number | null;
   obra_social: 'Pami' | 'Ioma' | 'Medife' | 'Particular' | null;
+  localidad: 'Del Viso' | 'Garin' | 'Maquinista Savio' | 'Pilar' | null;
   nombre: string;
   apellido: string;
   fecha_nacimiento: string | null;

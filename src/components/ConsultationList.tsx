@@ -105,8 +105,13 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
                 <div>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {format(parseISO(consultation.fecha), 'dd/MM/yyyy')}
+{consultation.fecha.split('T')[0].split('-').reverse().join('/')}
                   </CardTitle>
+                  {consultation.tipo && (
+                    <CardDescription className="mt-1">
+                      Tipo: {consultation.tipo}
+                    </CardDescription>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -168,6 +173,7 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
               initialData={{
                 fecha: editingConsultation.fecha,
                 notas: editingConsultation.notas,
+                tipo: editingConsultation.tipo,
               }}
               consultationId={editingConsultation.id}
             />

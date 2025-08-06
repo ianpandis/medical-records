@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 const consultationSchema = z.object({
   fecha: z.string().min(1, 'Fecha es requerida'),
   notas: z.string().min(1, 'Notas son requeridas'),
+  tipo: z.enum(['Primer Consulta', 'Segunda Consulta', 'Domicilio', 'Espontanea']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
 });
 
 type ConsultationFormData = z.infer<typeof consultationSchema>;
@@ -38,6 +39,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
     defaultValues: {
       fecha: initialData?.fecha ? new Date(initialData.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       notas: initialData?.notas || '',
+      tipo: initialData?.tipo || undefined,
     },
   });
 
@@ -49,6 +51,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
       const consultationData = {
         fecha: data.fecha,
         notas: data.notas,
+        tipo: data.tipo || null,
         patient_id: patientId,
         user_id: user.id,
       };
@@ -95,6 +98,24 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
         />
         {errors.fecha && (
           <p className="text-sm text-destructive mt-1">{errors.fecha.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="tipo">Tipo de Consulta</Label>
+        <select
+          id="tipo"
+          {...register('tipo')}
+          className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.tipo ? 'border-destructive' : ''}`}
+        >
+          <option value="">Seleccionar tipo de consulta</option>
+          <option value="Primer Consulta">Primer Consulta</option>
+          <option value="Segunda Consulta">Segunda Consulta</option>
+          <option value="Domicilio">Domicilio</option>
+          <option value="Espontanea">Espontanea</option>
+        </select>
+        {errors.tipo && (
+          <p className="text-sm text-destructive mt-1">{errors.tipo.message}</p>
         )}
       </div>
 

@@ -21,6 +21,7 @@ export type Database = {
           id: string
           notas: string
           patient_id: string
+          tipo: string | null
           updated_at: string
           user_id: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           id?: string
           notas: string
           patient_id: string
+          tipo?: string | null
           updated_at?: string
           user_id: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           id?: string
           notas?: string
           patient_id?: string
+          tipo?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -61,6 +64,7 @@ export type Database = {
           email: string | null
           fecha_nacimiento: string | null
           id: string
+          localidad: string | null
           nombre: string
           numero_afiliado: number | null
           numero_tramite: number | null
@@ -78,6 +82,7 @@ export type Database = {
           email?: string | null
           fecha_nacimiento?: string | null
           id?: string
+          localidad?: string | null
           nombre: string
           numero_afiliado?: number | null
           numero_tramite?: number | null
@@ -95,6 +100,7 @@ export type Database = {
           email?: string | null
           fecha_nacimiento?: string | null
           id?: string
+          localidad?: string | null
           nombre?: string
           numero_afiliado?: number | null
           numero_tramite?: number | null

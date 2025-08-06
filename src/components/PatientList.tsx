@@ -93,6 +93,12 @@ export const PatientList = ({ patients, loading, onPatientUpdated }: PatientList
                 <Badge variant="secondary">{patient.obra_social}</Badge>
               </div>
             )}
+            {patient.localidad && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span>Localidad: {patient.localidad}</span>
+              </div>
+            )}
             {patient.fecha_nacimiento && (
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
