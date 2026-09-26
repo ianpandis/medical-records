@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, errorMessage } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -83,11 +83,11 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
       }
 
       onSuccess();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving consultation:', error);
       toast({
         title: "Error",
-        description: error.message || "Error al guardar la consulta",
+        description: errorMessage(error, "Error al guardar la consulta"),
         variant: "destructive",
       });
     } finally {

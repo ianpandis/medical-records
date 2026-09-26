@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ConsultationForm } from '@/components/ConsultationForm';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { errorMessage } from '@/lib/utils';
 import type { Consultation } from '@/pages/PatientDetail';
 
 interface ConsultationListProps {
@@ -39,11 +40,11 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
         description: "Consulta eliminada correctamente",
       });
       onConsultationUpdated();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error eliminando consulta:', error);
       toast({
         title: "Error",
-        description: error.message || "No se pudo eliminar la consulta",
+        description: errorMessage(error, "No se pudo eliminar la consulta"),
         variant: "destructive",
       });
     } finally {

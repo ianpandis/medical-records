@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Edit, Plus, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, errorMessage } from '@/lib/utils';
 import { calcularEdad, toPatient } from '@/lib/patient';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
@@ -60,7 +60,7 @@ const PatientDetail = () => {
 
       if (error) throw error;
       setPatient(toPatient(data));
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching patient:', error);
       toast({
         title: "Error",
@@ -134,11 +134,11 @@ const PatientDetail = () => {
 
       // Navegar de vuelta al dashboard
       navigate('/');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error eliminando paciente:', error);
       toast({
         title: "Error",
-        description: error.message || "Error al eliminar el paciente",
+        description: errorMessage(error, "Error al eliminar el paciente"),
         variant: "destructive",
       });
     } finally {
