@@ -81,10 +81,6 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
           .eq('id', patientId);
 
         if (error) throw error;
-        toast({
-          title: "Éxito",
-          description: "Paciente actualizado correctamente",
-        });
       } else {
         // Create new patient
         const { error } = await supabase
@@ -92,10 +88,6 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
           .insert(patientData);
 
         if (error) throw error;
-        toast({
-          title: "Éxito",
-          description: "Paciente creado correctamente",
-        });
       }
 
       onSuccess();
