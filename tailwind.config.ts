@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
 	darkMode: ["class"],
@@ -18,6 +19,9 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Inter', ...fontFamily.sans]
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -51,6 +55,16 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				tint: {
+					sky: 'hsl(var(--tint-sky))',
+					'sky-foreground': 'hsl(var(--tint-sky-foreground))',
+					mint: 'hsl(var(--tint-mint))',
+					'mint-foreground': 'hsl(var(--tint-mint-foreground))',
+					peach: 'hsl(var(--tint-peach))',
+					'peach-foreground': 'hsl(var(--tint-peach-foreground))',
+					lavender: 'hsl(var(--tint-lavender))',
+					'lavender-foreground': 'hsl(var(--tint-lavender-foreground))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
