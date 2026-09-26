@@ -44,8 +44,8 @@ export function calcularEdad(fechaNacimiento: string): number {
 }
 
 // Documento, trámite y afiliado son texto (conservan ceros a la izquierda).
-// Hasta aplicar la migración 20260925000000 la base los devuelve como number:
-// se normalizan acá para que el resto de la app trabaje siempre con string.
+// Antes de la migración 20260926024457 la base los devolvía como number;
+// se siguen normalizando acá para que el resto de la app trabaje siempre con string.
 export function toPatient(row: Record<string, unknown>): Patient {
   const asText = (value: unknown) => (value === null || value === undefined ? null : String(value));
   return {
