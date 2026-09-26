@@ -118,15 +118,8 @@ const PatientDetail = () => {
     
     setDeleteLoading(true);
     try {
-      // Primero eliminar todas las consultas del paciente
-      const { error: consultationsError } = await supabase
-        .from('consultas')
-        .delete()
-        .eq('patient_id', patient.id);
-
-      if (consultationsError) throw consultationsError;
-
-      // Luego eliminar el paciente
+      // Las consultas se borran en la base por ON DELETE CASCADE (consultas.patient_id),
+      // así el borrado es atómico
       const { error: patientError } = await supabase
         .from('patients')
         .delete()
