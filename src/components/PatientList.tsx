@@ -1,10 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Phone, Mail, MapPin, FileText } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ChevronRight, SearchX } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ObraSocialBadge } from '@/components/ObraSocialBadge';
+import { calcularEdad } from '@/lib/patient';
 import type { Patient } from '@/pages/Dashboard';
 
 interface PatientListProps {
@@ -13,131 +13,132 @@ interface PatientListProps {
   onPatientUpdated: () => void;
 }
 
-// Función para calcular la edad a partir de la fecha de nacimiento
-function calcularEdad(fechaNacimiento: string): number {
-  const hoy = new Date();
-  const nacimiento = new Date(fechaNacimiento);
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-  const m = hoy.getMonth() - nacimiento.getMonth();
-  if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-    edad--;
-  }
-  return edad;
-}
+const Empty = () => <span className="text-muted-foreground/60">—</span>;
 
-export const PatientList = ({ patients, loading, onPatientUpdated }: PatientListProps) => {
+const documentoLabel = (patient: Patient) =>
+  patient.documento ? `${patient.tipo_documento ? `${patient.tipo_documento} ` : ''}${patient.documento}` : null;
+
+export const PatientList = ({ patients, loading }: PatientListProps) => {
   const navigate = useNavigate();
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="overflow-hidden" aria-busy="true">
+        <div className="divide-y">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-4">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="hidden h-4 w-24 md:block" />
+              <Skeleton className="hidden h-5 w-16 rounded-full md:block" />
+              <Skeleton className="ml-auto h-4 w-20" />
+            </div>
+          ))}
+        </div>
+      </Card>
     );
   }
 
   if (patients.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No patients found</p>
-        </CardContent>
+      <Card className="flex flex-col items-center px-6 py-14 text-center">
+        <div className="mb-4 flex size-10 items-center justify-center rounded-full bg-muted">
+          <SearchX className="size-5 text-muted-foreground" aria-hidden="true" />
+        </div>
+        <p className="font-medium">No se encontraron pacientes</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Prueba con otra búsqueda o limpia los filtros.
+        </p>
       </Card>
     );
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {patients.map((patient) => (
-        <Card key={patient.id} className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="text-lg">
-              {patient.apellido} {patient.nombre}
-            </CardTitle>
-    
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-            {patient.documento && patient.tipo_documento && (
-              <div className="flex items-center gap-2">
-                <span>{patient.tipo_documento} - {patient.documento}</span>
-              </div>
-            )}
-            {patient.numero_tramite && (
-              <div className="flex items-center gap-2">
-                <span>Número de tramite: {patient.numero_tramite}</span>
-              </div>
-            )}
-            {patient.numero_afiliado && (
-              <div className="flex items-center gap-2">
-                <span>Número de afiliado: {patient.numero_afiliado}</span>
-              </div>
-            )}
-            {patient.obra_social && (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary">{patient.obra_social}</Badge>
-              </div>
-            )}
-            {patient.localidad && (
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>Localidad: {patient.localidad}</span>
-              </div>
-            )}
-            {patient.fecha_nacimiento && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>Fecha de nacimiento: {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}</span>
-              </div>
-            )}
-            {patient.fecha_nacimiento && (
-              <div className="flex items-center gap-2">
-                <span className="ml-6 text-muted-foreground">Edad: {calcularEdad(patient.fecha_nacimiento)} años</span>
-              </div>
-            )}
-              {patient.telefono && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{patient.telefono}</span>
+    <>
+      {/* Desktop: tabla */}
+      <Card className="hidden overflow-hidden md:block">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50 hover:bg-muted/50">
+              <TableHead className="h-10 pl-5">Paciente</TableHead>
+              <TableHead className="h-10">Documento</TableHead>
+              <TableHead className="h-10">Obra social</TableHead>
+              <TableHead className="h-10">Localidad</TableHead>
+              <TableHead className="h-10 text-right">Edad</TableHead>
+              <TableHead className="h-10">Teléfono</TableHead>
+              <TableHead className="h-10 w-10"><span className="sr-only">Abrir</span></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {patients.map((patient) => (
+              <TableRow
+                key={patient.id}
+                onClick={() => navigate(`/patient/${patient.id}`)}
+                className="group cursor-pointer"
+              >
+                <TableCell className="py-3 pl-5">
+                  <Link
+                    to={`/patient/${patient.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-medium outline-none focus-visible:underline focus-visible:decoration-primary focus-visible:decoration-2 focus-visible:underline-offset-4"
+                  >
+                    {patient.apellido} {patient.nombre}
+                  </Link>
+                  {patient.email && (
+                    <div className="max-w-[16rem] truncate text-xs text-muted-foreground">{patient.email}</div>
+                  )}
+                </TableCell>
+                <TableCell className="py-3 tabular-nums">{documentoLabel(patient) ?? <Empty />}</TableCell>
+                <TableCell className="py-3">
+                  {patient.obra_social ? <ObraSocialBadge obraSocial={patient.obra_social} /> : <Empty />}
+                </TableCell>
+                <TableCell className="py-3">{patient.localidad ?? <Empty />}</TableCell>
+                <TableCell className="py-3 text-right tabular-nums">
+                  {patient.fecha_nacimiento ? calcularEdad(patient.fecha_nacimiento) : <Empty />}
+                </TableCell>
+                <TableCell className="py-3 tabular-nums">{patient.telefono ?? <Empty />}</TableCell>
+                <TableCell className="py-3 pr-4">
+                  <ChevronRight
+                    className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+
+      {/* Mobile: cards */}
+      <ul className="flex flex-col gap-3 md:hidden">
+        {patients.map((patient) => {
+          const documento = documentoLabel(patient);
+          return (
+            <li key={patient.id}>
+              <Link
+                to={`/patient/${patient.id}`}
+                className="block rounded-xl border bg-card p-4 outline-none transition-colors active:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{patient.apellido} {patient.nombre}</div>
+                    {documento && (
+                      <div className="mt-0.5 text-sm text-muted-foreground tabular-nums">{documento}</div>
+                    )}
+                  </div>
+                  {patient.obra_social && <ObraSocialBadge obraSocial={patient.obra_social} />}
                 </div>
-              )}
-              {patient.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{patient.email}</span>
-                </div>
-              )}
-              {patient.direccion && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{patient.direccion}</span>
-                </div>
-              )}
-            </div>
-            <Button 
-              className="w-full mt-4" 
-              onClick={() => navigate(`/patient/${patient.id}`)}
-            >
-              Ver Detalles
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+                {(patient.fecha_nacimiento || patient.localidad || patient.telefono) && (
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground tabular-nums">
+                    {patient.fecha_nacimiento && <span>{calcularEdad(patient.fecha_nacimiento)} años</span>}
+                    {patient.localidad && <span>{patient.localidad}</span>}
+                    {patient.telefono && <span>{patient.telefono}</span>}
+                  </div>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 };
