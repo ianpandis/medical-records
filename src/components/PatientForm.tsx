@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LOCALIDADES, OBRAS_SOCIALES, TIPOS_DOCUMENTO } from '@/lib/patient';
+import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,10 +18,10 @@ const patientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   lastname: z.string().min(1, 'El apellido es requerido'),
   date_of_birth: z.string().optional(),
-  document: z.string().optional(),
+  document: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').optional(),
   tipo_documento: z.enum(['DNI', 'LE', 'LC']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
-  numero_tramite: z.string().optional(),
-  numero_afiliado: z.string().optional(),
+  numero_tramite: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').optional(),
+  numero_afiliado: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').optional(),
   obra_social: z.enum(['Pami', 'Ioma', 'Medife', 'Particular']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
   localidad: z.enum(['Del Viso', 'Garin', 'Maquinista Savio', 'Pilar']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
   phone: z.string().optional(),
@@ -60,10 +60,10 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
       const patientData = {
         nombre: data.name,
         apellido: data.lastname,
-        documento: data.document && data.document.trim() !== '' ? parseInt(data.document, 10) : null,
+        documento: data.document || null,
         tipo_documento: data.tipo_documento || null,
-        numero_tramite: data.numero_tramite && data.numero_tramite.trim() !== '' ? parseInt(data.numero_tramite, 10) : null,
-        numero_afiliado: data.numero_afiliado && data.numero_afiliado.trim() !== '' ? parseInt(data.numero_afiliado, 10) : null,
+        numero_tramite: data.numero_tramite || null,
+        numero_afiliado: data.numero_afiliado || null,
         obra_social: data.obra_social || null,
         localidad: data.localidad || null,
         fecha_nacimiento: data.date_of_birth || null,
@@ -166,8 +166,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         <Field id="document" label="Número de documento" error={errors.document?.message}>
           <Input
             id="document"
-            type="number"
             inputMode="numeric"
+            autoComplete="off"
             className="tabular-nums"
             {...register('document')}
             {...invalidProps('document', errors.document)}
@@ -176,8 +176,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         <Field id="numero_tramite" label="Número de trámite" error={errors.numero_tramite?.message}>
           <Input
             id="numero_tramite"
-            type="number"
             inputMode="numeric"
+            autoComplete="off"
             className="tabular-nums"
             {...register('numero_tramite')}
             {...invalidProps('numero_tramite', errors.numero_tramite)}
@@ -196,8 +196,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         <Field id="numero_afiliado" label="Número de afiliado" error={errors.numero_afiliado?.message}>
           <Input
             id="numero_afiliado"
-            type="number"
             inputMode="numeric"
+            autoComplete="off"
             className="tabular-nums"
             {...register('numero_afiliado')}
             {...invalidProps('numero_afiliado', errors.numero_afiliado)}

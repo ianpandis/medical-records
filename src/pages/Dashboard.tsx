@@ -11,17 +11,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { LOCALIDADES, OBRAS_SOCIALES } from '@/lib/patient';
+import { LOCALIDADES, OBRAS_SOCIALES, toPatient } from '@/lib/patient';
 
 // Radix Select no admite value=""; usamos un centinela para "todas"
 const ALL = 'all';
 
 export interface Patient {
   id: string;
-  documento: number | null;
+  documento: string | null;
   tipo_documento: 'DNI' | 'LE' | 'LC' | null;
-  numero_tramite: number | null;
-  numero_afiliado: number | null;
+  numero_tramite: string | null;
+  numero_afiliado: string | null;
   obra_social: 'Pami' | 'Ioma' | 'Medife' | 'Particular' | null;
   localidad: 'Del Viso' | 'Garin' | 'Maquinista Savio' | 'Pilar' | null;
   nombre: string;
@@ -60,7 +60,7 @@ const Dashboard = () => {
         .order('apellido', { ascending: true });
 
       if (error) throw error;
-      setPatients((data || []) as Patient[]);
+      setPatients((data || []).map(toPatient));
     } catch (error) {
       console.error('Error trayendo pacientes:', error);
       toast({
@@ -79,7 +79,7 @@ const Dashboard = () => {
       `${patient.apellido} ${patient.nombre}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.documento?.toString().includes(searchTerm);
+      patient.documento?.includes(searchTerm);
     
     // Filtro por localidad
     const matchesLocalidad = localidadFilter === '' || patient.localidad === localidadFilter;

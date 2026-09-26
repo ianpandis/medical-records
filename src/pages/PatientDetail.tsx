@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { calcularEdad } from '@/lib/patient';
+import { calcularEdad, toPatient } from '@/lib/patient';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
 import { format, parseISO } from 'date-fns';
@@ -59,7 +59,7 @@ const PatientDetail = () => {
         .single();
 
       if (error) throw error;
-      setPatient(data as Patient);
+      setPatient(toPatient(data));
     } catch (error: any) {
       console.error('Error fetching patient:', error);
       toast({
@@ -238,10 +238,10 @@ const PatientDetail = () => {
                         name: patient.nombre || '',
                         lastname: patient.apellido || '',
                         date_of_birth: patient.fecha_nacimiento || '',
-                        document: patient.documento?.toString() || '',
+                        document: patient.documento ?? '',
                         tipo_documento: patient.tipo_documento || undefined,
-                        numero_tramite: patient.numero_tramite?.toString() || '',
-                        numero_afiliado: patient.numero_afiliado?.toString() || '',
+                        numero_tramite: patient.numero_tramite ?? '',
+                        numero_afiliado: patient.numero_afiliado ?? '',
                         obra_social: patient.obra_social || undefined,
                         localidad: patient.localidad || undefined,
                         phone: patient.telefono || '',

@@ -60,14 +60,14 @@ export type Database = {
           apellido: string
           created_at: string
           direccion: string | null
-          documento: number | null
+          documento: string | null
           email: string | null
           fecha_nacimiento: string | null
           id: string
           localidad: string | null
           nombre: string
-          numero_afiliado: number | null
-          numero_tramite: number | null
+          numero_afiliado: string | null
+          numero_tramite: string | null
           obra_social: string | null
           telefono: string | null
           tipo_documento: string | null
@@ -78,14 +78,14 @@ export type Database = {
           apellido: string
           created_at?: string
           direccion?: string | null
-          documento?: number | null
+          documento?: string | null
           email?: string | null
           fecha_nacimiento?: string | null
           id?: string
           localidad?: string | null
           nombre: string
-          numero_afiliado?: number | null
-          numero_tramite?: number | null
+          numero_afiliado?: string | null
+          numero_tramite?: string | null
           obra_social?: string | null
           telefono?: string | null
           tipo_documento?: string | null
@@ -96,14 +96,14 @@ export type Database = {
           apellido?: string
           created_at?: string
           direccion?: string | null
-          documento?: number | null
+          documento?: string | null
           email?: string | null
           fecha_nacimiento?: string | null
           id?: string
           localidad?: string | null
           nombre?: string
-          numero_afiliado?: number | null
-          numero_tramite?: number | null
+          numero_afiliado?: string | null
+          numero_tramite?: string | null
           obra_social?: string | null
           telefono?: string | null
           tipo_documento?: string | null
