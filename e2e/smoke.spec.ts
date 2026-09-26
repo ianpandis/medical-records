@@ -188,6 +188,20 @@ test.describe('Detalle de paciente', () => {
     await expect(app.getByRole('dialog', { name: 'Nueva consulta' }).getByLabel('Fecha de la consulta')).toHaveValue('2026-03-11');
   });
 
+  test('descarga la historia clínica en PDF', async ({ app }, testInfo) => {
+    await app.goto(`/patient/${PACIENTE.id}`);
+    await expect(app.getByText('2 consultas')).toBeVisible();
+    const [download] = await Promise.all([
+      app.waitForEvent('download'),
+      app.getByRole('button', { name: 'Descargar PDF' }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/^historia-clinica-aguirre-marta-\d{4}-\d{2}-\d{2}\.pdf$/);
+    const path = testInfo.outputPath(download.suggestedFilename());
+    await download.saveAs(path);
+    const { readFile } = await import('node:fs/promises');
+    expect((await readFile(path)).subarray(0, 5).toString()).toBe('%PDF-');
+  });
+
   test('un paciente inexistente vuelve a la lista', async ({ app }) => {
     await app.goto('/patient/no-existe');
     await expect(app).toHaveURL('/');

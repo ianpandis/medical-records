@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Download, Edit, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { calcularEdad } from '@/lib/patient';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
@@ -33,6 +33,7 @@ const PatientDetail = () => {
   const deleteLoading = deletePatient.isPending;
   const [showEditPatient, setShowEditPatient] = useState(false);
   const [showAddConsultation, setShowAddConsultation] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (!patientError) return;
@@ -89,6 +90,24 @@ const PatientDetail = () => {
         });
       },
     });
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!patient) return;
+    setDownloading(true);
+    try {
+      const { descargarHistoriaClinica } = await import('@/lib/historia-clinica-pdf');
+      await descargarHistoriaClinica(patient, consultations);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      toast({
+        title: "No se pudo generar el PDF",
+        description: "Revisa tu conexión e intenta de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (loading) {
@@ -158,7 +177,16 @@ const PatientDetail = () => {
                   </div>
                 )}
               </div>
-              <div className="flex shrink-0 gap-2">
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleDownloadPdf}
+                  // Sin las consultas cargadas el PDF saldría incompleto
+                  disabled={downloading || consultationsLoading || consultationsError}
+                >
+                  <Download aria-hidden="true" />
+                  {downloading ? "Generando…" : "Descargar PDF"}
+                </Button>
                 <FormDialog
                   open={showEditPatient}
                   onOpenChange={setShowEditPatient}
