@@ -87,6 +87,27 @@ test.describe('Dashboard', () => {
     expect(desc[0]).toBeGreaterThan(asc[0]);
   });
 
+  test('cerrar el alta sin cambios no pregunta; con cambios, sí', async ({ app }) => {
+    await app.goto('/');
+    await app.getByRole('button', { name: 'Agregar paciente' }).click();
+    const dialog = app.getByRole('dialog', { name: 'Agregar nuevo paciente' });
+    await expect(dialog).toBeVisible();
+    await app.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+
+    await app.getByRole('button', { name: 'Agregar paciente' }).click();
+    await dialog.getByLabel('Apellido').fill('Paz');
+    await app.keyboard.press('Escape');
+    const confirm = app.getByRole('alertdialog', { name: '¿Descartar cambios?' });
+    await expect(confirm).toBeVisible();
+    await confirm.getByRole('button', { name: 'Descartar' }).click();
+    await expect(dialog).toBeHidden();
+
+    // Al reabrir arranca vacío
+    await app.getByRole('button', { name: 'Agregar paciente' }).click();
+    await expect(dialog.getByLabel('Apellido')).toHaveValue('');
+  });
+
   test('el alta valida campos requeridos e identificadores', async ({ app }) => {
     await app.goto('/');
     await app.getByRole('button', { name: 'Agregar paciente' }).click();
@@ -104,6 +125,25 @@ test.describe('Dashboard', () => {
 });
 
 test.describe('Detalle de paciente', () => {
+  test('pide confirmación antes de descartar una consulta a medio escribir', async ({ app }) => {
+    await app.goto(`/patient/${PACIENTE.id}`);
+    await app.getByRole('button', { name: 'Nueva consulta' }).click();
+    const dialog = app.getByRole('dialog', { name: 'Nueva consulta' });
+    await dialog.getByLabel('Notas').fill('Paciente refiere dolor lumbar…');
+
+    // Click afuera del diálogo
+    await app.mouse.click(5, 5);
+    const confirm = app.getByRole('alertdialog', { name: '¿Descartar cambios?' });
+    await expect(confirm).toBeVisible();
+    await confirm.getByRole('button', { name: 'Seguir editando' }).click();
+    await expect(confirm).toBeHidden();
+    await expect(dialog.getByLabel('Notas')).toHaveValue('Paciente refiere dolor lumbar…');
+
+    await app.keyboard.press('Escape');
+    await confirm.getByRole('button', { name: 'Descartar' }).click();
+    await expect(dialog).toBeHidden();
+  });
+
   test('muestra datos, identificadores con ceros a la izquierda y consultas', async ({ app }) => {
     await app.goto(`/patient/${PACIENTE.id}`);
     await expect(app.getByRole('heading', { name: 'Aguirre Marta', level: 1 })).toBeVisible();

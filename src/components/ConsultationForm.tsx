@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { cn, errorMessage } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useReportDirty } from '@/hooks/use-dirty-form';
 import { useSaveConsultation } from '@/hooks/usePatientData';
 
 const TIPOS_CONSULTA = ['Primer Consulta', 'Segunda Consulta', 'Domicilio', 'Espontanea'] as const;
@@ -42,7 +43,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
     register,
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ConsultationFormData>({
     resolver: zodResolver(consultationSchema),
     defaultValues: {
@@ -51,6 +52,9 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
       tipo: initialData?.tipo || undefined,
     },
   });
+
+  // Avisa al FormDialog para pedir confirmación antes de cerrar con cambios sin guardar
+  useReportDirty(isDirty);
 
   const onSubmit = async (data: ConsultationFormData) => {
     if (!user) return;

@@ -12,6 +12,7 @@ import { cn, errorMessage } from '@/lib/utils';
 import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useReportDirty } from '@/hooks/use-dirty-form';
 import { useSavePatient } from '@/hooks/usePatientData';
 
 const patientSchema = z.object({
@@ -47,11 +48,14 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
     register,
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: initialData,
   });
+
+  // Avisa al FormDialog para pedir confirmación antes de cerrar con cambios sin guardar
+  useReportDirty(isDirty);
 
   const onSubmit = async (data: PatientFormData) => {
     if (!user) return;

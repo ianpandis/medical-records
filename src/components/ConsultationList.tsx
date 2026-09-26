@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar, Edit, Trash2, FileText } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FormDialog } from '@/components/FormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ConsultationForm } from '@/components/ConsultationForm';
 import { useDeleteConsultation } from '@/hooks/usePatientData';
@@ -154,25 +154,24 @@ export const ConsultationList = ({ patientId, consultations, loading }: Consulta
         })}
       </ol>
 
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
-          <DialogHeader>
-            <DialogTitle>Editar consulta</DialogTitle>
-          </DialogHeader>
-          {editingConsultation && (
-            <ConsultationForm
-              patientId={editingConsultation.patient_id}
-              onSuccess={handleEditSuccess}
-              initialData={{
-                fecha: editingConsultation.fecha,
-                notas: editingConsultation.notas,
-                tipo: editingConsultation.tipo,
-              }}
-              consultationId={editingConsultation.id}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <FormDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        title="Editar consulta"
+      >
+        {editingConsultation && (
+          <ConsultationForm
+            patientId={editingConsultation.patient_id}
+            onSuccess={handleEditSuccess}
+            initialData={{
+              fecha: editingConsultation.fecha,
+              notas: editingConsultation.notas,
+              tipo: editingConsultation.tipo,
+            }}
+            consultationId={editingConsultation.id}
+          />
+        )}
+      </FormDialog>
     </>
   );
 };

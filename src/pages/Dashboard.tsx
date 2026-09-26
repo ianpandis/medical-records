@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Plus, X } from 'lucide-react';
 import { PatientList } from '@/components/PatientList';
 import { PatientForm } from '@/components/PatientForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FormDialog } from '@/components/FormDialog';
 import { useToast } from '@/hooks/use-toast';
 import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
@@ -127,20 +127,19 @@ const Dashboard = () => {
                     : `${patients.length} ${patients.length === 1 ? 'paciente' : 'pacientes'}`}
               </p>
             </div>
-            <Dialog open={showAddPatient} onOpenChange={setShowAddPatient}>
-              <DialogTrigger asChild>
+            <FormDialog
+              open={showAddPatient}
+              onOpenChange={setShowAddPatient}
+              title="Agregar nuevo paciente"
+              trigger={
                 <Button className="self-start sm:self-auto">
                   <Plus aria-hidden="true" />
                   Agregar paciente
                 </Button>
-              </DialogTrigger>
-              <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
-                <DialogHeader>
-                  <DialogTitle>Agregar nuevo paciente</DialogTitle>
-                </DialogHeader>
-                <PatientForm onSuccess={handlePatientAdded} />
-              </DialogContent>
-            </Dialog>
+              }
+            >
+              <PatientForm onSuccess={handlePatientAdded} />
+            </FormDialog>
           </div>
 
           {/* Búsqueda y filtros */}

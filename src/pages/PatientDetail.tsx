@@ -16,7 +16,7 @@ import type { Patient } from '@/lib/patient';
 import { PatientForm } from '@/components/PatientForm';
 import { ConsultationList } from '@/components/ConsultationList';
 import { ConsultationForm } from '@/components/ConsultationForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FormDialog } from '@/components/FormDialog';
 import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -159,37 +159,36 @@ const PatientDetail = () => {
                 )}
               </div>
               <div className="flex shrink-0 gap-2">
-                <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
-                  <DialogTrigger asChild>
+                <FormDialog
+                  open={showEditPatient}
+                  onOpenChange={setShowEditPatient}
+                  title="Editar paciente"
+                  trigger={
                     <Button variant="outline">
                       <Edit aria-hidden="true" />
                       Editar
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
-                    <DialogHeader>
-                      <DialogTitle>Editar paciente</DialogTitle>
-                    </DialogHeader>
-                    <PatientForm 
-                      onSuccess={handlePatientUpdated}
-                      initialData={{
-                        name: patient.nombre || '',
-                        lastname: patient.apellido || '',
-                        date_of_birth: patient.fecha_nacimiento || '',
-                        document: patient.documento ?? '',
-                        tipo_documento: patient.tipo_documento || undefined,
-                        numero_tramite: patient.numero_tramite ?? '',
-                        numero_afiliado: patient.numero_afiliado ?? '',
-                        obra_social: patient.obra_social || undefined,
-                        localidad: patient.localidad || undefined,
-                        phone: patient.telefono || '',
-                        email: patient.email || '',
-                        address: patient.direccion || '',
-                      }}
-                      patientId={patient.id}
-                    />
-                  </DialogContent>
-                </Dialog>
+                  }
+                >
+                  <PatientForm 
+                    onSuccess={handlePatientUpdated}
+                    initialData={{
+                      name: patient.nombre || '',
+                      lastname: patient.apellido || '',
+                      date_of_birth: patient.fecha_nacimiento || '',
+                      document: patient.documento ?? '',
+                      tipo_documento: patient.tipo_documento || undefined,
+                      numero_tramite: patient.numero_tramite ?? '',
+                      numero_afiliado: patient.numero_afiliado ?? '',
+                      obra_social: patient.obra_social || undefined,
+                      localidad: patient.localidad || undefined,
+                      phone: patient.telefono || '',
+                      email: patient.email || '',
+                      address: patient.direccion || '',
+                    }}
+                    patientId={patient.id}
+                  />
+                </FormDialog>
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -261,23 +260,22 @@ const PatientDetail = () => {
                   </p>
                 )}
               </div>
-              <Dialog open={showAddConsultation} onOpenChange={setShowAddConsultation}>
-                <DialogTrigger asChild>
+              <FormDialog
+                open={showAddConsultation}
+                onOpenChange={setShowAddConsultation}
+                title="Nueva consulta"
+                trigger={
                   <Button>
                     <Plus aria-hidden="true" />
                     Nueva consulta
                   </Button>
-                </DialogTrigger>
-                <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
-                  <DialogHeader>
-                    <DialogTitle>Nueva consulta</DialogTitle>
-                  </DialogHeader>
-                  <ConsultationForm 
-                    patientId={id!}
-                    onSuccess={handleConsultationAdded}
-                  />
-                </DialogContent>
-              </Dialog>
+                }
+              >
+                <ConsultationForm 
+                  patientId={id!}
+                  onSuccess={handleConsultationAdded}
+                />
+              </FormDialog>
             </div>
             <ConsultationList
               patientId={id!}
