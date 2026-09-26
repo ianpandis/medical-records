@@ -7,7 +7,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <meta name="theme-color" content="#f6f9fc" />
+    <meta name="theme-color" content="#f6f9fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)" />
+    <script>
+      // Aplica el tema antes del primer paint (next-themes lo hace recién al montar React)
+      try {
+        var tema = localStorage.getItem('theme') || 'system';
+        if (tema === 'dark' || (tema === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
     <meta name="description" content="Gestión de pacientes y consultas médicas: historias clínicas simples y seguras." />
     <meta name="author" content="Ian Pandis" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

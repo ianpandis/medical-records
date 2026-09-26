@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +11,7 @@ import { BrandMark } from '@/components/BrandMark';
 const AuthPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { resolvedTheme } = useTheme();
 
   // Get the current origin (localhost in dev, production URL in prod)
   const redirectUrl = window.location.origin + '/';
@@ -35,6 +37,7 @@ const AuthPage = () => {
         <CardContent className="pb-8">
           <Auth
             supabaseClient={supabase}
+            theme={resolvedTheme === 'dark' ? 'dark' : 'default'}
             appearance={{ 
               theme: ThemeSupa,
               style: {

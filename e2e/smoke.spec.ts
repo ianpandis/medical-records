@@ -177,3 +177,27 @@ test.describe('Detalle de paciente', () => {
     await expect(app.getByText('No se pudo cargar los detalles del paciente', { exact: true })).toBeVisible();
   });
 });
+
+test.describe('Tema', () => {
+  test('sigue al sistema por defecto y recuerda la elección', async ({ app }, testInfo) => {
+    await app.emulateMedia({ colorScheme: 'dark' });
+    await app.goto('/');
+    const html = app.locator('html');
+    await expect(html).toHaveClass(/dark/);
+
+    const abrirMenu = async () => {
+      if (testInfo.project.name === 'mobile') {
+        await app.getByRole('button', { name: 'Mostrar u ocultar menú' }).first().click();
+      }
+    };
+    await abrirMenu();
+    const tema = app.getByRole('group', { name: 'Tema' });
+    await expect(tema.getByRole('radio', { name: 'Sistema' })).toHaveAttribute('aria-checked', 'true');
+    await tema.getByRole('radio', { name: 'Claro' }).click();
+    await expect(html).not.toHaveClass(/dark/);
+
+    await app.reload();
+    await expect(html).not.toHaveClass(/dark/);
+    await expectNoHorizontalOverflow(app);
+  });
+});

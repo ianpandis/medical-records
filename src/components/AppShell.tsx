@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { LogOut, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { BrandMark } from '@/components/BrandMark';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Separator } from '@/components/ui/separator';
 import { SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import {
@@ -70,6 +71,7 @@ const AppSidebar = () => {
             {user?.email}
           </div>
         </div>
+        <ThemeToggle />
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={signOut} className="h-9">

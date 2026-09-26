@@ -96,8 +96,10 @@ Dirección visual (v2):
     --accent: 216 20% 15%;
     --accent-foreground: 210 20% 96%;
 
-    --destructive: 350 70% 50%;
-    --destructive-foreground: 0 0% 100%;
+    /* Rojo claro con texto tinta: en fondo oscuro ningún rojo pasa AA como texto (≥4.5 sobre card)
+       y a la vez con texto blanco encima; así da 5.3:1 como texto y 5.7:1 en botones/toasts sólidos */
+    --destructive: 350 85% 64%;
+    --destructive-foreground: 216 28% 7%;
 
     --border: 216 18% 18%;
     --input: 216 18% 24%;
