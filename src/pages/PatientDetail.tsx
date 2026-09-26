@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Edit, Plus, Calendar, Phone, Mail, MapPin, Trash2 } from 'lucide-react';
+import { Edit, Plus, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { calcularEdad } from '@/lib/patient';
+import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -167,16 +170,14 @@ const PatientDetail = () => {
 
   if (!patient) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card>
-          <CardContent className="py-8 text-center">
-            <p className="text-muted-foreground">Paciente no encontrado</p>
-            <Button onClick={() => navigate('/')} className="mt-4">
-              Volver
-            </Button>
-          </CardContent>
+      <PageContent>
+        <Card className="flex flex-col items-center px-6 py-14 text-center">
+          <p className="font-medium">Paciente no encontrado</p>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/">Volver a pacientes</Link>
+          </Button>
         </Card>
-      </div>
+      </PageContent>
     );
   }
 
@@ -199,37 +200,36 @@ const PatientDetail = () => {
       </PageHeader>
 
       <PageContent>
-        <div className="space-y-6">
-          {/* Información del Paciente */}
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-xl">
-                    {patient.apellido} {patient.nombre}
-                  </CardTitle>
-                  <CardDescription>
-                    <div className="flex flex-wrap gap-2">
-                      {patient.documento && patient.tipo_documento && (
-                        <Badge variant="outline">Documento: {patient.documento} ({patient.tipo_documento})</Badge>
-                      )}
-                      {patient.obra_social && (
-                        <Badge variant="secondary">{patient.obra_social}</Badge>
-                      )}
-                    </div>
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </Button>
-                    </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+        <div className="space-y-10">
+          {/* Información del paciente */}
+          <section aria-labelledby="patient-name" className="space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-2">
+                <h1 id="patient-name" className="text-2xl font-semibold tracking-[-0.02em]">
+                  {patient.apellido} {patient.nombre}
+                </h1>
+                {(patient.documento || patient.obra_social) && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {patient.documento && (
+                      <Badge variant="outline" className="font-medium tabular-nums">
+                        {patient.tipo_documento ?? 'Doc.'} {patient.documento}
+                      </Badge>
+                    )}
+                    {patient.obra_social && <ObraSocialBadge obraSocial={patient.obra_social} />}
+                  </div>
+                )}
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Dialog open={showEditPatient} onOpenChange={setShowEditPatient}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Edit aria-hidden="true" />
+                      Editar
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle>Editar Paciente</DialogTitle>
+                      <DialogTitle>Editar paciente</DialogTitle>
                     </DialogHeader>
                     <PatientForm 
                       onSuccess={handlePatientUpdated}
@@ -251,19 +251,19 @@ const PatientDetail = () => {
                     />
                   </DialogContent>
                 </Dialog>
-                
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                      <Trash2 className="h-4 w-4 mr-2" />
+                    <Button variant="outline" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                      <Trash2 aria-hidden="true" />
                       Eliminar
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                      <AlertDialogTitle>¿Eliminar a {patient.apellido} {patient.nombre}?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Esta acción no se puede deshacer. Esto eliminará permanentemente al paciente "{patient.apellido} {patient.nombre}" y todas sus consultas asociadas.
+                        Esta acción no se puede deshacer. Se eliminará permanentemente al paciente y todas sus consultas asociadas.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -273,97 +273,79 @@ const PatientDetail = () => {
                         disabled={deleteLoading}
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
-                        {deleteLoading ? "Eliminando..." : "Eliminar"}
+                        {deleteLoading ? "Eliminando…" : "Eliminar paciente"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
             </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {patient.fecha_nacimiento && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>Fecha de nacimiento: {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}</span>
-                  </div>
-                )}
-                {patient.numero_tramite && (
-                  <div className="flex items-center gap-2">
-                    <span>Número de trámite: {patient.numero_tramite}</span>
-                  </div>
-                )}
-                {patient.numero_afiliado && (
-                  <div className="flex items-center gap-2">
-                    <span>Número de afiliado: {patient.numero_afiliado}</span>
-                  </div>
-                )}
-                {patient.telefono && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.telefono}</span>
-                  </div>
-                )}
-                {patient.email && (
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span>{patient.email}</span>
-                  </div>
-                )}
-                {patient.localidad && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>Localidad: {patient.localidad}</span>
-                  </div>
-                )}
-                {patient.direccion && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>Dirección: {patient.direccion}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
+            <Card>
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-5 p-5 sm:grid-cols-2 md:p-6 lg:grid-cols-4">
+                <DataItem label="Fecha de nacimiento">
+                  {patient.fecha_nacimiento && (
+                    <>
+                      {format(parseISO(patient.fecha_nacimiento), 'dd/MM/yyyy')}
+                      <span className="text-muted-foreground"> · {calcularEdad(patient.fecha_nacimiento)} años</span>
+                    </>
+                  )}
+                </DataItem>
+                <DataItem label="Número de trámite">{patient.numero_tramite}</DataItem>
+                <DataItem label="Número de afiliado">{patient.numero_afiliado}</DataItem>
+                <DataItem label="Localidad" numeric={false}>{patient.localidad}</DataItem>
+                <DataItem label="Teléfono">
+                  {patient.telefono && (
+                    <a href={`tel:${patient.telefono}`} className="underline-offset-4 hover:underline">{patient.telefono}</a>
+                  )}
+                </DataItem>
+                <DataItem label="Email" numeric={false}>
+                  {patient.email && (
+                    <a href={`mailto:${patient.email}`} className="break-all underline-offset-4 hover:underline">{patient.email}</a>
+                  )}
+                </DataItem>
+                <DataItem label="Dirección" numeric={false} className="sm:col-span-2">{patient.direccion}</DataItem>
+              </dl>
+            </Card>
+          </section>
 
           {/* Consultas */}
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Consultas Médicas</CardTitle>
-                  <CardDescription>
-                    Historial de consultas de este paciente
-                  </CardDescription>
-                </div>
-                <Dialog open={showAddConsultation} onOpenChange={setShowAddConsultation}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nueva Consulta
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Agregar Nueva Consulta</DialogTitle>
-                    </DialogHeader>
-                    <ConsultationForm 
-                      patientId={id!}
-                      onSuccess={handleConsultationAdded}
-                    />
-                  </DialogContent>
-                </Dialog>
+          <section aria-labelledby="consultas-title" className="space-y-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 id="consultas-title" className="text-lg font-semibold tracking-[-0.01em]">Consultas</h2>
+                {!consultationsLoading && (
+                  <p className="text-sm text-muted-foreground tabular-nums">
+                    {consultations.length === 0
+                      ? 'Sin consultas registradas'
+                      : `${consultations.length} ${consultations.length === 1 ? 'consulta' : 'consultas'}`}
+                  </p>
+                )}
               </div>
-            </CardHeader>
-            <CardContent>
-              <ConsultationList 
-                consultations={consultations}
-                loading={consultationsLoading}
-                onConsultationUpdated={fetchConsultations}
-              />
-            </CardContent>
-          </Card>
+              <Dialog open={showAddConsultation} onOpenChange={setShowAddConsultation}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus aria-hidden="true" />
+                    Nueva consulta
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Nueva consulta</DialogTitle>
+                  </DialogHeader>
+                  <ConsultationForm 
+                    patientId={id!}
+                    onSuccess={handleConsultationAdded}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+            <ConsultationList 
+              consultations={consultations}
+              loading={consultationsLoading}
+              onConsultationUpdated={fetchConsultations}
+            />
+          </section>
         </div>
       </PageContent>
     </>
@@ -371,3 +353,26 @@ const PatientDetail = () => {
 };
 
 export default PatientDetail;
+
+// Patrón caption + valor: label chico/muted arriba, valor abajo
+const DataItem = ({
+  label,
+  numeric = true,
+  className,
+  children,
+}: {
+  label: string;
+  numeric?: boolean;
+  className?: string;
+  children?: ReactNode;
+}) => {
+  const empty = children === null || children === undefined || children === false || children === '';
+  return (
+    <div className={cn('min-w-0 space-y-1', className)}>
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+      <dd className={cn('text-sm', numeric && 'tabular-nums')}>
+        {empty ? <span className="text-muted-foreground/60">—</span> : children}
+      </dd>
+    </div>
+  );
+};

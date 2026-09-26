@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -68,16 +68,12 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3" aria-busy="true">
         {[...Array(3)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-1/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-20 w-full" />
-            </CardContent>
+          <Card key={i} className="space-y-3 p-5">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
           </Card>
         ))}
       </div>
@@ -86,85 +82,89 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
 
   if (consultations.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No hay consultas registradas</p>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center rounded-xl border border-dashed px-6 py-12 text-center">
+        <div className="mb-4 flex size-10 items-center justify-center rounded-full bg-muted">
+          <FileText className="size-5 text-muted-foreground" aria-hidden="true" />
+        </div>
+        <p className="font-medium">No hay consultas registradas</p>
+        <p className="mt-1 text-sm text-muted-foreground">Las consultas que agregues aparecerán acá, de la más reciente a la más antigua.</p>
+      </div>
     );
   }
 
   return (
     <>
-      <div className="space-y-4">
-        {consultations.map((consultation) => (
-          <Card key={consultation.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-{consultation.fecha.split('T')[0].split('-').reverse().join('/')}
-                  </CardTitle>
-                  {consultation.tipo && (
-                    <CardDescription className="mt-1">
-                      Tipo: {consultation.tipo}
-                    </CardDescription>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(consultation)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={deletingId === consultation.id}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Eliminar Consulta</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          ¿Está seguro de querer eliminar esta consulta? Esta acción no puede ser deshecha.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(consultation.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+      <ol className="space-y-3">
+        {consultations.map((consultation) => {
+          const fecha = format(parseISO(consultation.fecha), 'dd/MM/yyyy');
+          return (
+            <li key={consultation.id}>
+              <Card className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <h3 className="flex items-center gap-2 text-sm font-semibold tabular-nums">
+                      <Calendar className="size-4 text-muted-foreground" aria-hidden="true" />
+                      <time dateTime={consultation.fecha}>{fecha}</time>
+                    </h3>
+                    {consultation.tipo && (
+                      <Badge variant="secondary" className="font-medium">{consultation.tipo}</Badge>
+                    )}
+                  </div>
+                  <div className="-mr-2 -mt-2 flex shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(consultation)}
+                      aria-label={`Editar consulta del ${fecha}`}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Edit aria-hidden="true" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={deletingId === consultation.id}
+                          aria-label={`Eliminar consulta del ${fecha}`}
+                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         >
-                          Eliminar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          <Trash2 aria-hidden="true" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Eliminar la consulta del {fecha}?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción no se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(consultation.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Eliminar consulta
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                {consultation.notas}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/85">
+                  {consultation.notas}
+                </p>
+              </Card>
+            </li>
+          );
+        })}
+      </ol>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Consulta</DialogTitle>
+            <DialogTitle>Editar consulta</DialogTitle>
           </DialogHeader>
           {editingConsultation && (
             <ConsultationForm
