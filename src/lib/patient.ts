@@ -1,3 +1,5 @@
+import { parseISO } from 'date-fns';
+
 export interface Patient {
   id: string;
   documento: string | null;
@@ -30,7 +32,9 @@ export interface Consultation {
 // Función para calcular la edad a partir de la fecha de nacimiento
 export function calcularEdad(fechaNacimiento: string): number {
   const hoy = new Date();
-  const nacimiento = new Date(fechaNacimiento);
+  // parseISO toma 'yyyy-MM-dd' como fecha local; new Date() la toma como UTC y en UTC-3
+  // cae el día anterior (la víspera del cumpleaños ya sumaba el año)
+  const nacimiento = parseISO(fechaNacimiento);
   let edad = hoy.getFullYear() - nacimiento.getFullYear();
   const m = hoy.getMonth() - nacimiento.getMonth();
   if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {

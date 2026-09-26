@@ -161,6 +161,16 @@ test.describe('Detalle de paciente', () => {
     await expect(dialog.getByLabel('Número de documento')).toHaveValue(PACIENTE.documento);
   });
 
+  test('fechas en hora local: edad la víspera del cumpleaños y fecha de consulta a la noche', async ({ app }) => {
+    // 11/03/2026 a las 22:30 en Buenos Aires = 12/03 en UTC; cumple 78 recién mañana
+    await app.clock.setFixedTime(new Date('2026-03-11T22:30:00-03:00'));
+    await app.goto(`/patient/${PACIENTE.id}`);
+    await expect(app.getByText('12/03/1948 · 77 años')).toBeVisible();
+
+    await app.getByRole('button', { name: 'Nueva consulta' }).click();
+    await expect(app.getByRole('dialog', { name: 'Nueva consulta' }).getByLabel('Fecha de la consulta')).toHaveValue('2026-03-11');
+  });
+
   test('un paciente inexistente vuelve a la lista', async ({ app }) => {
     await app.goto('/patient/no-existe');
     await expect(app).toHaveURL('/');

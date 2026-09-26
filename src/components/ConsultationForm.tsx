@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
 import { cn, errorMessage } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,7 +48,8 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
   } = useForm<ConsultationFormData>({
     resolver: zodResolver(consultationSchema),
     defaultValues: {
-      fecha: initialData?.fecha ? new Date(initialData.fecha).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      // Fecha local: toISOString() es UTC y después de las 21 h (UTC-3) daba el día siguiente
+      fecha: initialData?.fecha ?? format(new Date(), 'yyyy-MM-dd'),
       notas: initialData?.notas || '',
       tipo: initialData?.tipo || undefined,
     },
