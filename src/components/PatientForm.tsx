@@ -248,7 +248,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
 const FormSection = ({ title, children }: { title: string; children: ReactNode }) => (
   <fieldset className="space-y-4">
     <div className="space-y-3">
-      <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</legend>
+      <legend className="text-sm font-semibold">{title}</legend>
       <Separator />
     </div>
     <div className="grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-2">{children}</div>

@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ChevronRight, SearchX } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
+import { EmptyValue } from '@/components/EmptyValue';
 import { calcularEdad } from '@/lib/patient';
 import type { Patient } from '@/pages/Dashboard';
 
@@ -12,8 +13,6 @@ interface PatientListProps {
   loading: boolean;
   onPatientUpdated: () => void;
 }
-
-const Empty = () => <span className="text-muted-foreground/60">—</span>;
 
 const documentoLabel = (patient: Patient) =>
   patient.documento ? `${patient.tipo_documento ? `${patient.tipo_documento} ` : ''}${patient.documento}` : null;
@@ -87,15 +86,15 @@ export const PatientList = ({ patients, loading }: PatientListProps) => {
                     <div className="max-w-[16rem] truncate text-xs text-muted-foreground">{patient.email}</div>
                   )}
                 </TableCell>
-                <TableCell className="py-3 tabular-nums">{documentoLabel(patient) ?? <Empty />}</TableCell>
+                <TableCell className="py-3 tabular-nums">{documentoLabel(patient) ?? <EmptyValue />}</TableCell>
                 <TableCell className="py-3">
-                  {patient.obra_social ? <ObraSocialBadge obraSocial={patient.obra_social} /> : <Empty />}
+                  {patient.obra_social ? <ObraSocialBadge obraSocial={patient.obra_social} /> : <EmptyValue />}
                 </TableCell>
-                <TableCell className="py-3">{patient.localidad ?? <Empty />}</TableCell>
+                <TableCell className="py-3">{patient.localidad ?? <EmptyValue />}</TableCell>
                 <TableCell className="py-3 text-right tabular-nums">
-                  {patient.fecha_nacimiento ? calcularEdad(patient.fecha_nacimiento) : <Empty />}
+                  {patient.fecha_nacimiento ? calcularEdad(patient.fecha_nacimiento) : <EmptyValue />}
                 </TableCell>
-                <TableCell className="py-3 tabular-nums">{patient.telefono ?? <Empty />}</TableCell>
+                <TableCell className="py-3 tabular-nums">{patient.telefono ?? <EmptyValue />}</TableCell>
                 <TableCell className="py-3 pr-4">
                   <ChevronRight
                     className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-muted-foreground"

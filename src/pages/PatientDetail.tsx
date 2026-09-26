@@ -8,6 +8,7 @@ import { Edit, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { calcularEdad } from '@/lib/patient';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
+import { EmptyValue } from '@/components/EmptyValue';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -371,7 +372,7 @@ const DataItem = ({
     <div className={cn('min-w-0 space-y-1', className)}>
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd className={cn('text-sm', numeric && 'tabular-nums')}>
-        {empty ? <span className="text-muted-foreground/60">—</span> : children}
+        {empty ? <EmptyValue /> : children}
       </dd>
     </div>
   );
