@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useState, type ReactNode } from 'react';
+import { Controller, useForm, type Control, type FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { LOCALIDADES, OBRAS_SOCIALES, TIPOS_DOCUMENTO } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,6 +44,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<PatientFormData>({
@@ -107,173 +112,224 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-          <Label htmlFor="lastname">Apellido *</Label>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+      <FormSection title="Datos personales">
+        <Field id="lastname" label="Apellido" required error={errors.lastname?.message}>
           <Input
             id="lastname"
+            autoComplete="off"
+            aria-required="true"
             {...register('lastname')}
-            className={errors.lastname ? 'border-destructive' : ''}
+            {...invalidProps('lastname', errors.lastname)}
           />
-          {errors.lastname && (
-            <p className="text-sm text-destructive mt-1">{errors.lastname.message}</p>
-          )}
-        </div>
-        <div>
-          <Label htmlFor="name">Nombre *</Label>
+        </Field>
+        <Field id="name" label="Nombre" required error={errors.name?.message}>
           <Input
             id="name"
+            autoComplete="off"
+            aria-required="true"
             {...register('name')}
-            className={errors.name ? 'border-destructive' : ''}
+            {...invalidProps('name', errors.name)}
           />
-          {errors.name && (
-            <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
-          )}
-        </div>
-
-    
-
-        <div>
-          <Label htmlFor="numero_afiliado">Número de Afiliado</Label>
-          <Input
-            id="numero_afiliado"
-            type="number"
-            {...register('numero_afiliado')}
-            className={errors.numero_afiliado ? 'border-destructive' : ''}
-          />
-          {errors.numero_afiliado && (
-            <p className="text-sm text-destructive mt-1">{errors.numero_afiliado.message}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="document">Número de Documento</Label>
-          <Input
-            id="document"
-            type="number"
-            {...register('document')}
-            className={errors.document ? 'border-destructive' : ''}
-          />
-          {errors.document && (
-            <p className="text-sm text-destructive mt-1">{errors.document.message}</p>
-          )}
-        </div>
-
-    {/*     <div>
-          <Label htmlFor="tipo_documento">Tipo de Documento</Label>
-          <select
-            id="tipo_documento"
-            {...register('tipo_documento')}
-            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.tipo_documento ? 'border-destructive' : ''}`}
-          >
-            <option value="">Seleccionar tipo de documento</option>
-            <option value="DNI">DNI</option>
-            <option value="LE">LE</option>
-            <option value="LC">LC</option>
-          </select>
-          {errors.tipo_documento && (
-            <p className="text-sm text-destructive mt-1">{errors.tipo_documento.message}</p>
-          )}
-        </div> */}
-
-        <div>
-          <Label htmlFor="numero_tramite">Número de Trámite</Label>
-          <Input
-            id="numero_tramite"
-            type="number"
-            {...register('numero_tramite')}
-            className={errors.numero_tramite ? 'border-destructive' : ''}
-          />
-          {errors.numero_tramite && (
-            <p className="text-sm text-destructive mt-1">{errors.numero_tramite.message}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="date_of_birth">Fecha de Nacimiento</Label>
+        </Field>
+        <Field id="date_of_birth" label="Fecha de nacimiento" error={errors.date_of_birth?.message}>
           <Input
             id="date_of_birth"
             type="date"
             {...register('date_of_birth')}
-            className={errors.date_of_birth ? 'border-destructive' : ''}
+            {...invalidProps('date_of_birth', errors.date_of_birth)}
           />
-          {errors.date_of_birth && (
-            <p className="text-sm text-destructive mt-1">{errors.date_of_birth.message}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="obra_social">Obra Social</Label>
-          <select
-            id="obra_social"
-            {...register('obra_social')}
-            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.obra_social ? 'border-destructive' : ''}`}
-          >
-            <option value="">Seleccionar obra social</option>
-            <option value="Pami">Pami</option>
-            <option value="Ioma">Ioma</option>
-            <option value="Medife">Medife</option>
-            <option value="Particular">Particular</option>
-          </select>
-          {errors.obra_social && (
-            <p className="text-sm text-destructive mt-1">{errors.obra_social.message}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="localidad">Localidad</Label>
-          <select
+        </Field>
+        <Field id="localidad" label="Localidad" error={errors.localidad?.message}>
+          <EnumSelect
             id="localidad"
-            {...register('localidad')}
-            className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.localidad ? 'border-destructive' : ''}`}
-          >
-            <option value="">Seleccionar localidad</option>
-            <option value="Del Viso">Del Viso</option>
-            <option value="Garin">Garin</option>
-            <option value="Maquinista Savio">Maquinista Savio</option>
-            <option value="Pilar">Pilar</option>
-          </select>
-          {errors.localidad && (
-            <p className="text-sm text-destructive mt-1">{errors.localidad.message}</p>
-          )}
-        </div>
+            name="localidad"
+            control={control}
+            options={LOCALIDADES}
+            placeholder="Seleccionar localidad"
+            invalid={!!errors.localidad}
+          />
+        </Field>
+      </FormSection>
 
-        <div>
-          <Label htmlFor="phone">Teléfono</Label>
+      <FormSection title="Documentación">
+        <Field id="tipo_documento" label="Tipo de documento" error={errors.tipo_documento?.message}>
+          <EnumSelect
+            id="tipo_documento"
+            name="tipo_documento"
+            control={control}
+            options={TIPOS_DOCUMENTO}
+            placeholder="Seleccionar tipo"
+            invalid={!!errors.tipo_documento}
+          />
+        </Field>
+        <Field id="document" label="Número de documento" error={errors.document?.message}>
+          <Input
+            id="document"
+            type="number"
+            inputMode="numeric"
+            className="tabular-nums"
+            {...register('document')}
+            {...invalidProps('document', errors.document)}
+          />
+        </Field>
+        <Field id="numero_tramite" label="Número de trámite" error={errors.numero_tramite?.message}>
+          <Input
+            id="numero_tramite"
+            type="number"
+            inputMode="numeric"
+            className="tabular-nums"
+            {...register('numero_tramite')}
+            {...invalidProps('numero_tramite', errors.numero_tramite)}
+          />
+        </Field>
+        <Field id="obra_social" label="Obra social" error={errors.obra_social?.message}>
+          <EnumSelect
+            id="obra_social"
+            name="obra_social"
+            control={control}
+            options={OBRAS_SOCIALES}
+            placeholder="Seleccionar obra social"
+            invalid={!!errors.obra_social}
+          />
+        </Field>
+        <Field id="numero_afiliado" label="Número de afiliado" error={errors.numero_afiliado?.message}>
+          <Input
+            id="numero_afiliado"
+            type="number"
+            inputMode="numeric"
+            className="tabular-nums"
+            {...register('numero_afiliado')}
+            {...invalidProps('numero_afiliado', errors.numero_afiliado)}
+          />
+        </Field>
+      </FormSection>
+
+      <FormSection title="Contacto">
+        <Field id="phone" label="Teléfono">
           <Input
             id="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="off"
+            className="tabular-nums"
             {...register('phone')}
           />
-        </div>
-
-        <div>
-          <Label htmlFor="email">Email</Label>
+        </Field>
+        <Field id="email" label="Email" error={errors.email?.message}>
           <Input
             id="email"
             type="email"
+            autoComplete="off"
+            spellCheck={false}
             {...register('email')}
-            className={errors.email ? 'border-destructive' : ''}
+            {...invalidProps('email', errors.email)}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
-          )}
-        </div>
-      </div>
+        </Field>
+        <Field id="address" label="Dirección" className="md:col-span-2">
+          <Input
+            id="address"
+            autoComplete="off"
+            {...register('address')}
+          />
+        </Field>
+      </FormSection>
 
-      <div>
-        <Label htmlFor="address">Dirección</Label>
-        <Input
-          id="address"
-          {...register('address')}
-        />
-      </div>
-
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 border-t pt-4">
         <Button type="submit" disabled={loading}>
-          {loading ? 'Guardando...' : patientId ? 'Actualizar Paciente' : 'Agregar Paciente'}
+          {loading && <Loader2 className="animate-spin" aria-hidden="true" />}
+          {loading ? 'Guardando…' : patientId ? 'Guardar cambios' : 'Agregar paciente'}
         </Button>
       </div>
     </form>
   );
 };
+
+const FormSection = ({ title, children }: { title: string; children: ReactNode }) => (
+  <fieldset className="space-y-4">
+    <div className="space-y-3">
+      <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</legend>
+      <Separator />
+    </div>
+    <div className="grid grid-cols-1 gap-x-4 gap-y-4 md:grid-cols-2">{children}</div>
+  </fieldset>
+);
+
+const Field = ({
+  id,
+  label,
+  required,
+  error,
+  className,
+  children,
+}: {
+  id: string;
+  label: string;
+  required?: boolean;
+  error?: string;
+  className?: string;
+  children: ReactNode;
+}) => (
+  <div className={cn('space-y-1.5', className)}>
+    <Label htmlFor={id}>
+      {label}
+      {required && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
+    </Label>
+    {children}
+    {error && (
+      <p id={`${id}-error`} className="text-sm text-destructive" role="alert">{error}</p>
+    )}
+  </div>
+);
+
+const invalidProps = (id: string, error?: FieldError) =>
+  error
+    ? { 'aria-invalid': true, 'aria-describedby': `${id}-error` }
+    : {};
+
+// Radix Select no admite value=""; "Sin especificar" vuelve el campo a '' (el schema lo transforma a null)
+const NONE = '__none__';
+
+const EnumSelect = ({
+  id,
+  name,
+  control,
+  options,
+  placeholder,
+  invalid,
+}: {
+  id: string;
+  name: 'tipo_documento' | 'obra_social' | 'localidad';
+  control: Control<PatientFormData>;
+  options: readonly string[];
+  placeholder: string;
+  invalid?: boolean;
+}) => (
+  <Controller
+    name={name}
+    control={control}
+    render={({ field }) => (
+      <Select
+        value={field.value ?? ''}
+        onValueChange={(value) => field.onChange(value === NONE ? '' : value)}
+      >
+        <SelectTrigger
+          id={id}
+          ref={field.ref}
+          onBlur={field.onBlur}
+          aria-invalid={invalid || undefined}
+          aria-describedby={invalid ? `${id}-error` : undefined}
+          className={cn(!field.value && 'text-muted-foreground')}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={NONE} className="text-muted-foreground">Sin especificar</SelectItem>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>{option}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )}
+  />
+);

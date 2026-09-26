@@ -139,3 +139,10 @@ Dirección visual (v2):
     text-wrap: balance;
   }
 }
+
+/* Estado de error de campos: fuera de @layer para ganarle a la utilidad border-input */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+button[aria-invalid="true"] {
+  border-color: hsl(var(--destructive));
+}
