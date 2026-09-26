@@ -4,6 +4,7 @@ import { LogOut, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { BrandMark } from '@/components/BrandMark';
 import { Separator } from '@/components/ui/separator';
+import { SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import {
   Sidebar,
   SidebarContent,
@@ -24,11 +25,17 @@ import {
 const AppSidebar = () => {
   const { user, signOut } = useAuth();
   const { pathname } = useLocation();
-  const { setOpenMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const pacientesActive = pathname === '/' || pathname.startsWith('/patient/');
 
   return (
     <Sidebar>
+      {isMobile && (
+        <>
+          <SheetTitle className="sr-only">Menú</SheetTitle>
+          <SheetDescription className="sr-only">Navegación principal</SheetDescription>
+        </>
+      )}
       <SidebarHeader className="px-3 py-4">
         <Link to="/" onClick={() => setOpenMobile(false)} className="flex items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring">
           <BrandMark />
@@ -79,8 +86,14 @@ const AppSidebar = () => {
 
 export const AppShell = () => (
   <SidebarProvider>
+    <a
+      href="#contenido"
+      className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+    >
+      Saltar al contenido
+    </a>
     <AppSidebar />
-    <SidebarInset>
+    <SidebarInset id="contenido" tabIndex={-1} className="outline-none">
       <Outlet />
     </SidebarInset>
   </SidebarProvider>

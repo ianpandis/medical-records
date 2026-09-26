@@ -47,6 +47,11 @@ const AuthPage = () => {
                 },
               }
             }}
+            localization={{
+              variables: {
+                sign_in: { social_provider_text: 'Continuar con {{provider}}' },
+              },
+            }}
             providers={['google']}
             redirectTo={redirectUrl}
             onlyThirdPartyProviders={true}

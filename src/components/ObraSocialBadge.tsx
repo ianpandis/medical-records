@@ -6,6 +6,7 @@ import type { Patient } from '@/pages/Dashboard';
 export const ObraSocialBadge = ({ obraSocial }: { obraSocial: NonNullable<Patient['obra_social']> }) => (
   <Badge
     variant="outline"
+    translate="no"
     className={cn('border-transparent font-medium', obraSocialTint[obraSocial])}
   >
     {obraSocial}

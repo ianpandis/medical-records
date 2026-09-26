@@ -133,7 +133,7 @@ const Dashboard = () => {
                   Agregar paciente
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
+              <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
                 <DialogHeader>
                   <DialogTitle>Agregar nuevo paciente</DialogTitle>
                 </DialogHeader>
@@ -148,6 +148,7 @@ const Dashboard = () => {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
                 type="search"
+                name="q"
                 aria-label="Buscar pacientes"
                 placeholder="Buscar por nombre o documento…"
                 value={searchTerm}

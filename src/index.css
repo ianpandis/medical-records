@@ -70,6 +70,8 @@ Dirección visual (v2):
     --sidebar-border: 213 24% 91%;
 
     --sidebar-ring: 248 98% 61%;
+
+    color-scheme: light;
   }
 
   .dark {
@@ -118,6 +120,8 @@ Dirección visual (v2):
     --sidebar-accent-foreground: 210 20% 96%;
     --sidebar-border: 216 18% 18%;
     --sidebar-ring: 248 90% 72%;
+
+    color-scheme: dark;
   }
 }
 
@@ -128,6 +132,9 @@ Dirección visual (v2):
 
   html {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    /* que el header sticky (h-14) no tape el elemento enfocado */
+    scroll-padding-top: 4.5rem;
   }
 
   body {

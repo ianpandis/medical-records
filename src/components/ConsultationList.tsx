@@ -162,7 +162,7 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
       </ol>
 
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto">
+        <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
           <DialogHeader>
             <DialogTitle>Editar consulta</DialogTitle>
           </DialogHeader>
