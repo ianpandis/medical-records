@@ -133,7 +133,7 @@ const Dashboard = () => {
                   Agregar paciente
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
+              <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
                 <DialogHeader>
                   <DialogTitle>Agregar nuevo paciente</DialogTitle>
                 </DialogHeader>
@@ -153,7 +153,7 @@ const Dashboard = () => {
                 placeholder="Buscar por nombre o documento…"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-card pl-9"
+                className="pl-9"
                 autoComplete="off"
                 spellCheck={false}
               />
@@ -163,7 +163,7 @@ const Dashboard = () => {
                 value={localidadFilter || ALL}
                 onValueChange={(value) => setLocalidadFilter(value === ALL ? '' : value)}
               >
-                <SelectTrigger aria-label="Filtrar por localidad" className="bg-card md:w-48">
+                <SelectTrigger aria-label="Filtrar por localidad" className="min-w-0 md:w-56">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ const Dashboard = () => {
                 value={obraSocialFilter || ALL}
                 onValueChange={(value) => setObraSocialFilter(value === ALL ? '' : value)}
               >
-                <SelectTrigger aria-label="Filtrar por obra social" className="bg-card md:w-48">
+                <SelectTrigger aria-label="Filtrar por obra social" className="min-w-0 md:w-56">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

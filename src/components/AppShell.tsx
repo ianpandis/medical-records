@@ -93,7 +93,7 @@ export const AppShell = () => (
       Saltar al contenido
     </a>
     <AppSidebar />
-    <SidebarInset id="contenido" tabIndex={-1} className="outline-none">
+    <SidebarInset id="contenido" tabIndex={-1} className="min-w-0 outline-none">
       <Outlet />
     </SidebarInset>
   </SidebarProvider>

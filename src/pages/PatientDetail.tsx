@@ -228,7 +228,7 @@ const PatientDetail = () => {
                       Editar
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
+                  <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
                     <DialogHeader>
                       <DialogTitle>Editar paciente</DialogTitle>
                     </DialogHeader>
@@ -330,7 +330,7 @@ const PatientDetail = () => {
                     Nueva consulta
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
+                <DialogContent aria-describedby={undefined} className="max-h-[90dvh] max-w-2xl overflow-y-auto overscroll-contain">
                   <DialogHeader>
                     <DialogTitle>Nueva consulta</DialogTitle>
                   </DialogHeader>
