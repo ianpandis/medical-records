@@ -4,7 +4,8 @@ import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
+import { BrandMark } from '@/components/BrandMark';
 
 const AuthPage = () => {
   const { user } = useAuth();
@@ -20,15 +21,18 @@ const AuthPage = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Sistema de Consultas Medicas</CardTitle>
-          <CardDescription>
-            Inicia sesión para acceder al sistema de consultas médicas
-          </CardDescription>
+    <main className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="items-center space-y-3 pb-4 pt-8 text-center">
+          <BrandMark className="size-11 rounded-xl [&_svg]:size-5" />
+          <div className="space-y-1.5">
+            <h1 className="text-xl font-semibold tracking-[-0.01em]">Consultas médicas</h1>
+            <CardDescription>
+              Inicia sesión para acceder al registro de pacientes y consultas.
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-8">
           <Auth
             supabaseClient={supabase}
             appearance={{ 
@@ -49,7 +53,7 @@ const AuthPage = () => {
           />
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 };
 
