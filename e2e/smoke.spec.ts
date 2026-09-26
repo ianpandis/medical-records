@@ -49,6 +49,44 @@ test.describe('Dashboard', () => {
     await expect(app.getByText(`${TOTAL_PATIENTS} pacientes`, { exact: true })).toBeVisible();
   });
 
+  test('pagina de a 50 y el filtro vuelve a la primera página', async ({ app }) => {
+    await app.goto('/');
+    const paginacion = app.getByRole('navigation', { name: 'Paginación' });
+    await expect(paginacion.getByText(`1–50 de ${TOTAL_PATIENTS}`)).toBeVisible();
+    await expect(paginacion.getByRole('button', { name: 'Página anterior' })).toBeDisabled();
+
+    await paginacion.getByRole('button', { name: 'Página siguiente' }).click();
+    await expect(app).toHaveURL(/pagina=2/);
+    await expect(paginacion.getByText(`51–100 de ${TOTAL_PATIENTS}`)).toBeVisible();
+
+    await app.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('a');
+    await expect(app).not.toHaveURL(/pagina=/);
+  });
+
+  test('ordena por columna con aria-sort', async ({ app }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'En mobile la lista son cards, sin headers');
+    await app.goto('/');
+    const table = app.getByRole('table');
+    const edad = table.getByRole('columnheader', { name: 'Edad' });
+    await expect(edad).toHaveAttribute('aria-sort', 'none');
+    await expect(table.getByRole('columnheader', { name: 'Paciente' })).toHaveAttribute('aria-sort', 'ascending');
+
+    const edades = async () =>
+      (await table.locator('tbody tr td:nth-child(5)').allInnerTexts()).map(Number).filter((n) => !Number.isNaN(n));
+
+    await edad.getByRole('button').click();
+    await expect(edad).toHaveAttribute('aria-sort', 'ascending');
+    await expect(app).toHaveURL(/orden=edad/);
+    const asc = await edades();
+    expect(asc).toEqual([...asc].sort((a, b) => a - b));
+
+    await edad.getByRole('button').click();
+    await expect(edad).toHaveAttribute('aria-sort', 'descending');
+    const desc = await edades();
+    expect(desc).toEqual([...desc].sort((a, b) => b - a));
+    expect(desc[0]).toBeGreaterThan(asc[0]);
+  });
+
   test('el alta valida campos requeridos e identificadores', async ({ app }) => {
     await app.goto('/');
     await app.getByRole('button', { name: 'Agregar paciente' }).click();

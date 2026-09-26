@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { usePatients } from '@/hooks/usePatientData';
 import { Button } from '@/components/ui/button';
@@ -11,10 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { LOCALIDADES, OBRAS_SOCIALES } from '@/lib/patient';
+import { LOCALIDADES, OBRAS_SOCIALES, SORT_KEYS, sortPatients, type SortDir, type SortKey } from '@/lib/patient';
+import { ListPagination } from '@/components/ListPagination';
 
 // Radix Select no admite value=""; usamos un centinela para "todas"
 const ALL = 'all';
+
+const PAGE_SIZE = 50;
 
 // Valor de la URL solo si es una opción válida (un ?obra= manual inválido no filtra todo a cero)
 const oneOf = (options: readonly string[], value: string | null) =>
@@ -28,7 +31,10 @@ const Dashboard = () => {
   const searchTerm = searchParams.get('q') ?? '';
   const localidadFilter = oneOf(LOCALIDADES, searchParams.get('localidad'));
   const obraSocialFilter = oneOf(OBRAS_SOCIALES, searchParams.get('obra'));
+  const sortKey = (oneOf(SORT_KEYS, searchParams.get('orden')) || 'paciente') as SortKey;
+  const sortDir: SortDir = searchParams.get('dir') === 'desc' ? 'desc' : 'asc';
   const [showAddPatient, setShowAddPatient] = useState(false);
+  const listTopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isError) return;
@@ -57,15 +63,33 @@ const Dashboard = () => {
   });
 
   // replace al tipear para no llenar el historial con cada tecla
-  const setFilters = (changes: Partial<Record<'q' | 'localidad' | 'obra', string>>, { replace = false } = {}) => {
+  const setFilters = (changes: Partial<Record<'q' | 'localidad' | 'obra' | 'orden' | 'dir' | 'pagina', string>>, { replace = false } = {}) => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
+      // Cualquier cambio de filtro u orden vuelve a la primera página
+      if (!('pagina' in changes)) next.delete('pagina');
       for (const [key, value] of Object.entries(changes)) {
         if (value) next.set(key, value);
         else next.delete(key);
       }
       return next;
     }, { replace });
+  };
+
+  const sortedPatients = sortPatients(filteredPatients, sortKey, sortDir);
+  const pageCount = Math.max(1, Math.ceil(sortedPatients.length / PAGE_SIZE));
+  const page = Math.min(Math.max(1, Number(searchParams.get('pagina')) || 1), pageCount);
+  const pagePatients = sortedPatients.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Misma columna invierte la dirección; otra columna arranca ascendente
+  const handleSort = (key: SortKey) => {
+    const dir = key === sortKey && sortDir === 'asc' ? 'desc' : 'asc';
+    setFilters({ orden: key === 'paciente' ? '' : key, dir: dir === 'asc' ? '' : dir });
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    setFilters({ pagina: nextPage > 1 ? String(nextPage) : '' });
+    listTopRef.current?.scrollIntoView({ block: 'start' });
   };
 
   const handlePatientAdded = () => {
@@ -177,10 +201,21 @@ const Dashboard = () => {
             )}
           </div>
 
-          <PatientList 
-            patients={filteredPatients} 
-            loading={loading}
-          />
+          <div ref={listTopRef} className="flex scroll-mt-20 flex-col gap-4">
+            <PatientList
+              patients={pagePatients}
+              loading={loading}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              onSort={handleSort}
+            />
+            <ListPagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              total={sortedPatients.length}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </div>
       </PageContent>
     </>

@@ -66,3 +66,30 @@ export const obraSocialTint: Record<NonNullable<Patient['obra_social']>, string>
   Medife: 'bg-tint-peach text-tint-peach-foreground',
   Particular: 'bg-tint-lavender text-tint-lavender-foreground',
 };
+
+// Orden del listado de pacientes
+export const SORT_KEYS = ['paciente', 'edad', 'obra'] as const;
+export type SortKey = (typeof SORT_KEYS)[number];
+export type SortDir = 'asc' | 'desc';
+
+const collator = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+const nombreCompleto = (patient: Patient) => `${patient.apellido} ${patient.nombre}`;
+
+export function sortPatients(patients: Patient[], key: SortKey, dir: SortDir): Patient[] {
+  const sign = dir === 'asc' ? 1 : -1;
+  const value = (patient: Patient) =>
+    key === 'paciente' ? nombreCompleto(patient) : key === 'obra' ? patient.obra_social : patient.fecha_nacimiento;
+  return [...patients].sort((a, b) => {
+    const x = value(a);
+    const y = value(b);
+    // Los vacíos van siempre al final, en cualquier dirección
+    if (x === null || y === null) {
+      if (x !== y) return x === null ? 1 : -1;
+    } else {
+      // Edad ascendente = fecha de nacimiento más reciente primero
+      const cmp = key === 'edad' ? collator.compare(y, x) : collator.compare(x, y);
+      if (cmp !== 0) return sign * cmp;
+    }
+    return collator.compare(nombreCompleto(a), nombreCompleto(b));
+  });
+}

@@ -1,22 +1,29 @@
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronRight, SearchX } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronRight, ChevronsUpDown, SearchX } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
 import { calcularEdad } from '@/lib/patient';
-import type { Patient } from '@/lib/patient';
+import type { Patient, SortDir, SortKey } from '@/lib/patient';
 
 interface PatientListProps {
   patients: Patient[];
   loading: boolean;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
 }
 
 const documentoLabel = (patient: Patient) =>
   patient.documento ? `${patient.tipo_documento ? `${patient.tipo_documento} ` : ''}${patient.documento}` : null;
 
-export const PatientList = ({ patients, loading }: PatientListProps) => {
+export const PatientList = ({ patients, loading, sortKey, sortDir, onSort }: PatientListProps) => {
+  const sortProps = { sortKey, sortDir, onSort };
   const navigate = useNavigate();
   // El detalle usa esto para volver a la lista con los mismos filtros
   const { search } = useLocation();
@@ -60,11 +67,11 @@ export const PatientList = ({ patients, loading }: PatientListProps) => {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">
-              <TableHead className="h-10 pl-5">Paciente</TableHead>
+              <SortableHead column="paciente" className="pl-3" {...sortProps}>Paciente</SortableHead>
               <TableHead className="h-10">Documento</TableHead>
-              <TableHead className="h-10">Obra social</TableHead>
+              <SortableHead column="obra" {...sortProps}>Obra social</SortableHead>
               <TableHead className="h-10">Localidad</TableHead>
-              <TableHead className="h-10 text-right">Edad</TableHead>
+              <SortableHead column="edad" align="right" {...sortProps}>Edad</SortableHead>
               <TableHead className="h-10">Teléfono</TableHead>
               <TableHead className="h-10 w-10"><span className="sr-only">Abrir</span></TableHead>
             </TableRow>
@@ -143,5 +150,47 @@ export const PatientList = ({ patients, loading }: PatientListProps) => {
         })}
       </ul>
     </>
+  );
+};
+
+// Header ordenable: aria-sort en el <th> y el botón adentro
+const SortableHead = ({
+  column,
+  align = 'left',
+  className,
+  sortKey,
+  sortDir,
+  onSort,
+  children,
+}: {
+  column: SortKey;
+  align?: 'left' | 'right';
+  className?: string;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (key: SortKey) => void;
+  children: ReactNode;
+}) => {
+  const active = sortKey === column;
+  const Icon = !active ? ChevronsUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown;
+  return (
+    <TableHead
+      aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+      className={cn('h-10 px-2', align === 'right' && 'text-right', className)}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onSort(column)}
+        className={cn(
+          'h-8 gap-1 rounded-md px-2 font-medium',
+          active ? 'text-foreground' : 'text-muted-foreground',
+          align === 'right' && 'flex-row-reverse'
+        )}
+      >
+        {children}
+        <Icon className={cn('size-3.5', !active && 'opacity-50')} aria-hidden="true" />
+      </Button>
+    </TableHead>
   );
 };
