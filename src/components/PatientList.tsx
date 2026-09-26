@@ -6,12 +6,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
 import { calcularEdad } from '@/lib/patient';
-import type { Patient } from '@/pages/Dashboard';
+import type { Patient } from '@/lib/patient';
 
 interface PatientListProps {
   patients: Patient[];
   loading: boolean;
-  onPatientUpdated: () => void;
 }
 
 const documentoLabel = (patient: Patient) =>

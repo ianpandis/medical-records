@@ -10,7 +10,16 @@ import NotFound from "./pages/NotFound";
 import { AppShell } from "@/components/AppShell";
 import { Loader2 } from "lucide-react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Al volver del detalle se muestra la lista cacheada sin refetch inmediato
+      staleTime: 30_000,
+      // Un reintento alcanza; con el default (3) un paciente inexistente tarda ~7s en redirigir
+      retry: 1,
+    },
+  },
+});
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();

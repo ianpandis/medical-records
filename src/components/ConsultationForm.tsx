@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 import { cn, errorMessage } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSaveConsultation } from '@/hooks/usePatientData';
 
 const TIPOS_CONSULTA = ['Primer Consulta', 'Segunda Consulta', 'Domicilio', 'Espontanea'] as const;
 
@@ -36,7 +35,8 @@ interface ConsultationFormProps {
 export const ConsultationForm = ({ patientId, onSuccess, initialData, consultationId }: ConsultationFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const saveConsultation = useSaveConsultation(patientId, consultationId);
+  const loading = saveConsultation.isPending;
 
   const {
     register,
@@ -55,33 +55,14 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
   const onSubmit = async (data: ConsultationFormData) => {
     if (!user) return;
 
-    setLoading(true);
     try {
-      const consultationData = {
+      await saveConsultation.mutateAsync({
         fecha: data.fecha,
         notas: data.notas,
         tipo: data.tipo || null,
         patient_id: patientId,
         user_id: user.id,
-      };
-
-      if (consultationId) {
-        // Update existing consultation
-        const { error } = await supabase
-          .from('consultas')
-          .update(consultationData)
-          .eq('id', consultationId);
-
-        if (error) throw error;
-      } else {
-        // Create new consultation
-        const { error } = await supabase
-          .from('consultas')
-          .insert(consultationData);
-
-        if (error) throw error;
-      }
-
+      });
       onSuccess();
     } catch (error) {
       console.error('Error saving consultation:', error);
@@ -90,8 +71,6 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
         description: errorMessage(error, "Error al guardar la consulta"),
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 

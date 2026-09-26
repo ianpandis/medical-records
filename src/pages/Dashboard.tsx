@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { usePatients } from '@/hooks/usePatientData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
 import { Search, Plus, X } from 'lucide-react';
 import { PatientList } from '@/components/PatientList';
 import { PatientForm } from '@/components/PatientForm';
@@ -11,67 +10,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { LOCALIDADES, OBRAS_SOCIALES, toPatient } from '@/lib/patient';
+import { LOCALIDADES, OBRAS_SOCIALES } from '@/lib/patient';
 
 // Radix Select no admite value=""; usamos un centinela para "todas"
 const ALL = 'all';
 
-export interface Patient {
-  id: string;
-  documento: string | null;
-  tipo_documento: 'DNI' | 'LE' | 'LC' | null;
-  numero_tramite: string | null;
-  numero_afiliado: string | null;
-  obra_social: 'Pami' | 'Ioma' | 'Medife' | 'Particular' | null;
-  localidad: 'Del Viso' | 'Garin' | 'Maquinista Savio' | 'Pilar' | null;
-  nombre: string;
-  apellido: string;
-  fecha_nacimiento: string | null;
-  telefono: string | null;
-  email: string | null;
-  direccion: string | null;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-}
-
 const Dashboard = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [patients, setPatients] = useState<Patient[]>([]);
+  const { data: patients = [], isPending: loading, isError } = usePatients();
   const [searchTerm, setSearchTerm] = useState('');
   const [localidadFilter, setLocalidadFilter] = useState<string>('');
   const [obraSocialFilter, setObraSocialFilter] = useState<string>('');
-  const [loading, setLoading] = useState(true);
   const [showAddPatient, setShowAddPatient] = useState(false);
 
   useEffect(() => {
-    fetchPatients();
-  }, []);
-
-  const fetchPatients = async () => {
-    if (!user?.id) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('apellido', { ascending: true });
-
-      if (error) throw error;
-      setPatients((data || []).map(toPatient));
-    } catch (error) {
-      console.error('Error trayendo pacientes:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo cargar la lista de pacientes",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (!isError) return;
+    toast({
+      title: "Error",
+      description: "No se pudo cargar la lista de pacientes",
+      variant: "destructive",
+    });
+  }, [isError, toast]);
 
   const filteredPatients = patients.filter(patient => {
     // Filtro por texto de búsqueda
@@ -91,7 +50,6 @@ const Dashboard = () => {
   });
 
   const handlePatientAdded = () => {
-    fetchPatients();
     setShowAddPatient(false);
     toast({
       title: "Éxito",
@@ -207,7 +165,6 @@ const Dashboard = () => {
           <PatientList 
             patients={filteredPatients} 
             loading={loading}
-            onPatientUpdated={fetchPatients}
           />
         </div>
       </PageContent>

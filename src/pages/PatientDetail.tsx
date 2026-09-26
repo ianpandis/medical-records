@@ -6,13 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 import { cn, errorMessage } from '@/lib/utils';
-import { calcularEdad, toPatient } from '@/lib/patient';
+import { calcularEdad } from '@/lib/patient';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
 import { format, parseISO } from 'date-fns';
-import { supabase } from '@/integrations/supabase/client';
+import { useConsultations, useDeletePatient, usePatient } from '@/hooks/usePatientData';
 import { useToast } from '@/hooks/use-toast';
-import type { Patient } from '@/pages/Dashboard';
+import type { Patient } from '@/lib/patient';
 import { PatientForm } from '@/components/PatientForm';
 import { ConsultationList } from '@/components/ConsultationList';
 import { ConsultationForm } from '@/components/ConsultationForm';
@@ -21,82 +21,37 @@ import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
-export interface Consultation {
-  id: string;
-  patient_id: string;
-  fecha: string;
-  notas: string;
-  tipo: 'Primer Consulta' | 'Segunda Consulta' | 'Domicilio' | 'Espontanea' | null;
-  created_at: string;
-  updated_at: string;
-}
-
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [patient, setPatient] = useState<Patient | null>(null);
-  const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [consultationsLoading, setConsultationsLoading] = useState(true);
+  const { data: patient, isPending: loading, isError: patientError } = usePatient(id);
+  const { data: consultations = [], isPending: consultationsLoading, isError: consultationsError } = useConsultations(id);
+  const deletePatient = useDeletePatient();
+  const deleteLoading = deletePatient.isPending;
   const [showEditPatient, setShowEditPatient] = useState(false);
   const [showAddConsultation, setShowAddConsultation] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      fetchPatient();
-      fetchConsultations();
-    }
-  }, [id]);
+    if (!patientError) return;
+    toast({
+      title: "Error",
+      description: "No se pudo cargar los detalles del paciente",
+      variant: "destructive",
+    });
+    navigate('/');
+  }, [patientError, toast, navigate]);
 
-  const fetchPatient = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      setPatient(toPatient(data));
-    } catch (error) {
-      console.error('Error fetching patient:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo cargar los detalles del paciente",
-        variant: "destructive",
-      });
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchConsultations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('consultas')
-        .select('*')
-        .eq('patient_id', id)
-        .order('fecha', { ascending: false });
-
-      if (error) throw error;
-      setConsultations((data || []) as Consultation[]);
-    } catch (error) {
-      console.error('Error fetching consultations:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo cargar las consultas",
-        variant: "destructive",
-      });
-    } finally {
-      setConsultationsLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (!consultationsError) return;
+    toast({
+      title: "Error",
+      description: "No se pudo cargar las consultas",
+      variant: "destructive",
+    });
+  }, [consultationsError, toast]);
 
   const handlePatientUpdated = () => {
-    fetchPatient();
     setShowEditPatient(false);
     toast({
       title: "Éxito",
@@ -105,7 +60,6 @@ const PatientDetail = () => {
   };
 
   const handleConsultationAdded = () => {
-    fetchConsultations();
     setShowAddConsultation(false);
     toast({
       title: "Éxito",
@@ -113,37 +67,26 @@ const PatientDetail = () => {
     });
   };
 
-  const handleDeletePatient = async () => {
+  const handleDeletePatient = () => {
     if (!patient?.id) return;
-    
-    setDeleteLoading(true);
-    try {
-      // Las consultas se borran en la base por ON DELETE CASCADE (consultas.patient_id),
-      // así el borrado es atómico
-      const { error: patientError } = await supabase
-        .from('patients')
-        .delete()
-        .eq('id', patient.id);
 
-      if (patientError) throw patientError;
-
-      toast({
-        title: "Éxito",
-        description: "Paciente eliminado correctamente",
-      });
-
-      // Navegar de vuelta al dashboard
-      navigate('/');
-    } catch (error) {
-      console.error('Error eliminando paciente:', error);
-      toast({
-        title: "Error",
-        description: errorMessage(error, "Error al eliminar el paciente"),
-        variant: "destructive",
-      });
-    } finally {
-      setDeleteLoading(false);
-    }
+    deletePatient.mutate(patient.id, {
+      onSuccess: () => {
+        toast({
+          title: "Éxito",
+          description: "Paciente eliminado correctamente",
+        });
+        navigate('/');
+      },
+      onError: (error) => {
+        console.error('Error eliminando paciente:', error);
+        toast({
+          title: "Error",
+          description: errorMessage(error, "Error al eliminar el paciente"),
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   if (loading) {
@@ -334,10 +277,10 @@ const PatientDetail = () => {
                 </DialogContent>
               </Dialog>
             </div>
-            <ConsultationList 
+            <ConsultationList
+              patientId={id!}
               consultations={consultations}
               loading={consultationsLoading}
-              onConsultationUpdated={fetchConsultations}
             />
           </section>
         </div>

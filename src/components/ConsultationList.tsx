@@ -8,48 +8,41 @@ import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ConsultationForm } from '@/components/ConsultationForm';
-import { supabase } from '@/integrations/supabase/client';
+import { useDeleteConsultation } from '@/hooks/usePatientData';
 import { useToast } from '@/hooks/use-toast';
 import { errorMessage } from '@/lib/utils';
-import type { Consultation } from '@/pages/PatientDetail';
+import type { Consultation } from '@/lib/patient';
 
 interface ConsultationListProps {
+  patientId: string;
   consultations: Consultation[];
   loading: boolean;
-  onConsultationUpdated: () => void;
 }
 
-export const ConsultationList = ({ consultations, loading, onConsultationUpdated }: ConsultationListProps) => {
+export const ConsultationList = ({ patientId, consultations, loading }: ConsultationListProps) => {
   const { toast } = useToast();
   const [editingConsultation, setEditingConsultation] = useState<Consultation | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const deleteConsultation = useDeleteConsultation(patientId);
+  const deletingId = deleteConsultation.isPending ? deleteConsultation.variables : null;
 
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    try {
-      const { error } = await supabase
-        .from('consultas')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast({
-        title: "Éxito",
-        description: "Consulta eliminada correctamente",
-      });
-      onConsultationUpdated();
-    } catch (error) {
-      console.error('Error eliminando consulta:', error);
-      toast({
-        title: "Error",
-        description: errorMessage(error, "No se pudo eliminar la consulta"),
-        variant: "destructive",
-      });
-    } finally {
-      setDeletingId(null);
-    }
+  const handleDelete = (id: string) => {
+    deleteConsultation.mutate(id, {
+      onSuccess: () => {
+        toast({
+          title: "Éxito",
+          description: "Consulta eliminada correctamente",
+        });
+      },
+      onError: (error) => {
+        console.error('Error eliminando consulta:', error);
+        toast({
+          title: "Error",
+          description: errorMessage(error, "No se pudo eliminar la consulta"),
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   const handleEdit = (consultation: Consultation) => {
@@ -60,7 +53,6 @@ export const ConsultationList = ({ consultations, loading, onConsultationUpdated
   const handleEditSuccess = () => {
     setShowEditDialog(false);
     setEditingConsultation(null);
-    onConsultationUpdated();
     toast({
       title: "Éxito",
       description: "Consulta actualizada correctamente",

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Controller, useForm, type Control, type FieldError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,8 +11,8 @@ import { Loader2 } from 'lucide-react';
 import { cn, errorMessage } from '@/lib/utils';
 import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSavePatient } from '@/hooks/usePatientData';
 
 const patientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
@@ -40,7 +40,8 @@ interface PatientFormProps {
 export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const savePatient = useSavePatient(patientId);
+  const loading = savePatient.isPending;
 
   const {
     register,
@@ -55,9 +56,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
   const onSubmit = async (data: PatientFormData) => {
     if (!user) return;
 
-    setLoading(true);
     try {
-      const patientData = {
+      await savePatient.mutateAsync({
         nombre: data.name,
         apellido: data.lastname,
         documento: data.document || null,
@@ -71,25 +71,7 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         email: data.email || null,
         telefono: data.phone || null,
         direccion: data.address || null,
-      };
-
-      if (patientId) {
-        // Update existing patient
-        const { error } = await supabase
-          .from('patients')
-          .update(patientData)
-          .eq('id', patientId);
-
-        if (error) throw error;
-      } else {
-        // Create new patient
-        const { error } = await supabase
-          .from('patients')
-          .insert(patientData);
-
-        if (error) throw error;
-      }
-
+      });
       onSuccess();
     } catch (error) {
       console.error('Error saving patient:', error);
@@ -98,8 +80,6 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
         description: errorMessage(error, "Error al guardar el paciente"),
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -1,4 +1,31 @@
-import type { Patient } from '@/pages/Dashboard';
+export interface Patient {
+  id: string;
+  documento: string | null;
+  tipo_documento: 'DNI' | 'LE' | 'LC' | null;
+  numero_tramite: string | null;
+  numero_afiliado: string | null;
+  obra_social: 'Pami' | 'Ioma' | 'Medife' | 'Particular' | null;
+  localidad: 'Del Viso' | 'Garin' | 'Maquinista Savio' | 'Pilar' | null;
+  nombre: string;
+  apellido: string;
+  fecha_nacimiento: string | null;
+  telefono: string | null;
+  email: string | null;
+  direccion: string | null;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
+export interface Consultation {
+  id: string;
+  patient_id: string;
+  fecha: string;
+  notas: string;
+  tipo: 'Primer Consulta' | 'Segunda Consulta' | 'Domicilio' | 'Espontanea' | null;
+  created_at: string;
+  updated_at: string;
+}
 
 // Función para calcular la edad a partir de la fecha de nacimiento
 export function calcularEdad(fechaNacimiento: string): number {

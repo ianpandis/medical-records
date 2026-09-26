@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { obraSocialTint } from '@/lib/patient';
-import type { Patient } from '@/pages/Dashboard';
+import type { Patient } from '@/lib/patient';
 
 export const ObraSocialBadge = ({ obraSocial }: { obraSocial: NonNullable<Patient['obra_social']> }) => (
   <Badge
