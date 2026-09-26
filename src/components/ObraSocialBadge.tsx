@@ -1,0 +1,13 @@
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { obraSocialTint } from '@/lib/patient';
+import type { Patient } from '@/pages/Dashboard';
+
+export const ObraSocialBadge = ({ obraSocial }: { obraSocial: NonNullable<Patient['obra_social']> }) => (
+  <Badge
+    variant="outline"
+    className={cn('border-transparent font-medium', obraSocialTint[obraSocial])}
+  >
+    {obraSocial}
+  </Badge>
+);

@@ -10,6 +10,8 @@ import { PatientList } from '@/components/PatientList';
 import { PatientForm } from '@/components/PatientForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { PageContent, PageHeader } from '@/components/AppShell';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 
 export interface Patient {
   id: string;
@@ -95,24 +97,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Sistema de Registros Médicos</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              <span className="text-sm">{user?.email}</span>
-            </div>
-            <Button variant="outline" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Cerrar sesión
-            </Button>
-          </div>
-        </div>
-      </header>
+    <>
+      <PageHeader>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Pacientes</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </PageHeader>
 
-      <main className="container mx-auto px-4 py-8">
+      <PageContent>
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
@@ -231,8 +227,8 @@ const Dashboard = () => {
             onPatientUpdated={fetchPatients}
           />
         </div>
-      </main>
-    </div>
+      </PageContent>
+    </>
   );
 };
 

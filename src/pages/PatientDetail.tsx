@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Plus, Calendar, Phone, Mail, MapPin, Trash2 } from 'lucide-react';
+import { Edit, Plus, Calendar, Phone, Mail, MapPin, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,8 @@ import { PatientForm } from '@/components/PatientForm';
 import { ConsultationList } from '@/components/ConsultationList';
 import { ConsultationForm } from '@/components/ConsultationForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { PageContent, PageHeader } from '@/components/AppShell';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export interface Consultation {
@@ -149,19 +151,17 @@ const PatientDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <header className="border-b">
-          <div className="container mx-auto px-4 py-4">
-            <Skeleton className="h-8 w-64" />
-          </div>
-        </header>
-        <main className="container mx-auto px-4 py-8">
+      <>
+        <PageHeader>
+          <Skeleton className="h-4 w-48" />
+        </PageHeader>
+        <PageContent>
           <div className="space-y-6">
             <Skeleton className="h-32 w-full" />
             <Skeleton className="h-64 w-full" />
           </div>
-        </main>
-      </div>
+        </PageContent>
+      </>
     );
   }
 
@@ -181,22 +181,24 @@ const PatientDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver al Panel
-          </Button>
-          <h1 className="text-2xl font-bold">Detalles del Paciente</h1>
-        </div>
-      </header>
+    <>
+      <PageHeader>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">Pacientes</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{patient.apellido} {patient.nombre}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </PageHeader>
 
-      <main className="container mx-auto px-4 py-8">
+      <PageContent>
         <div className="space-y-6">
           {/* Información del Paciente */}
           <Card>
@@ -363,8 +365,8 @@ const PatientDetail = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </PageContent>
+    </>
   );
 };
 

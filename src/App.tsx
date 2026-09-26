@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import PatientDetail from "./pages/PatientDetail";
 import NotFound from "./pages/NotFound";
+import { AppShell } from "@/components/AppShell";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -15,7 +17,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center gap-2 text-sm text-muted-foreground" role="status">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        Cargando…
+      </div>
+    );
   }
   
   if (!user) {
@@ -34,16 +41,14 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={
+            <Route element={
               <ProtectedRoute>
-                <Dashboard />
+                <AppShell />
               </ProtectedRoute>
-            } />
-            <Route path="/patient/:id" element={
-              <ProtectedRoute>
-                <PatientDetail />
-              </ProtectedRoute>
-            } />
+            }>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/patient/:id" element={<PatientDetail />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
