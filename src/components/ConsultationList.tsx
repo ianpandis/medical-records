@@ -10,7 +10,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ConsultationForm } from '@/components/ConsultationForm';
 import { useDeleteConsultation } from '@/hooks/usePatientData';
 import { useToast } from '@/hooks/use-toast';
-import { errorMessage } from '@/lib/utils';
 import type { Consultation } from '@/lib/patient';
 
 interface ConsultationListProps {
@@ -37,8 +36,8 @@ export const ConsultationList = ({ patientId, consultations, loading }: Consulta
       onError: (error) => {
         console.error('Error eliminando consulta:', error);
         toast({
-          title: "Error",
-          description: errorMessage(error, "No se pudo eliminar la consulta"),
+          title: "No se pudo eliminar la consulta",
+          description: "Revisa tu conexión e intenta de nuevo.",
           variant: "destructive",
         });
       },

@@ -108,6 +108,23 @@ test.describe('Dashboard', () => {
     await expect(dialog.getByLabel('Apellido')).toHaveValue('');
   });
 
+  test('si falla el guardado avisa qué hacer y conserva lo escrito', async ({ app }) => {
+    await app.goto('/');
+    await app.getByRole('button', { name: 'Agregar paciente' }).click();
+    const dialog = app.getByRole('dialog', { name: 'Agregar nuevo paciente' });
+    await dialog.getByLabel('Apellido').fill('Paz');
+    await dialog.getByLabel('Nombre').fill('Julia');
+    await dialog.getByLabel('Número de trámite').fill('00612345987');
+    // El mock rechaza toda escritura; igual se verifica que el insert mande el trámite como texto
+    const insert = app.waitForRequest((r) => r.method() === 'POST' && r.url().includes('/rest/v1/patients'));
+    await dialog.getByRole('button', { name: 'Agregar paciente' }).click();
+    expect((await insert).postDataJSON()).toMatchObject({ apellido: 'Paz', numero_tramite: '00612345987', documento: null });
+
+    await expect(app.getByText('No se pudo guardar el paciente', { exact: true })).toBeVisible();
+    await expect(app.getByText('Revisa tu conexión e intenta de nuevo. Lo que escribiste sigue en el formulario.', { exact: true })).toBeVisible();
+    await expect(dialog.getByLabel('Número de trámite')).toHaveValue('00612345987');
+  });
+
   test('el alta valida campos requeridos e identificadores', async ({ app }) => {
     await app.goto('/');
     await app.getByRole('button', { name: 'Agregar paciente' }).click();
@@ -174,7 +191,7 @@ test.describe('Detalle de paciente', () => {
   test('un paciente inexistente vuelve a la lista', async ({ app }) => {
     await app.goto('/patient/no-existe');
     await expect(app).toHaveURL('/');
-    await expect(app.getByText('No se pudo cargar los detalles del paciente', { exact: true })).toBeVisible();
+    await expect(app.getByText('No se pudieron cargar los datos del paciente', { exact: true })).toBeVisible();
   });
 });
 

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import { cn, errorMessage } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,8 +80,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
     } catch (error) {
       console.error('Error saving patient:', error);
       toast({
-        title: "Error",
-        description: errorMessage(error, "Error al guardar el paciente"),
+        title: "No se pudo guardar el paciente",
+        description: "Revisa tu conexión e intenta de nuevo. Lo que escribiste sigue en el formulario.",
         variant: "destructive",
       });
     }

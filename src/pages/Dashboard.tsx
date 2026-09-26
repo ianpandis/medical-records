@@ -39,8 +39,8 @@ const Dashboard = () => {
   useEffect(() => {
     if (!isError) return;
     toast({
-      title: "Error",
-      description: "No se pudo cargar la lista de pacientes",
+      title: "No se pudo cargar la lista de pacientes",
+      description: "Revisa tu conexión y recarga la página.",
       variant: "destructive",
     });
   }, [isError, toast]);

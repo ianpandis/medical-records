@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn, errorMessage } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useReportDirty } from '@/hooks/use-dirty-form';
@@ -73,8 +73,8 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
     } catch (error) {
       console.error('Error saving consultation:', error);
       toast({
-        title: "Error",
-        description: errorMessage(error, "Error al guardar la consulta"),
+        title: "No se pudo guardar la consulta",
+        description: "Revisa tu conexión e intenta de nuevo. Lo que escribiste sigue en el formulario.",
         variant: "destructive",
       });
     }

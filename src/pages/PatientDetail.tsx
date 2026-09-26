@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Edit, Plus, Trash2 } from 'lucide-react';
-import { cn, errorMessage } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { calcularEdad } from '@/lib/patient';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
@@ -37,8 +37,8 @@ const PatientDetail = () => {
   useEffect(() => {
     if (!patientError) return;
     toast({
-      title: "Error",
-      description: "No se pudo cargar los detalles del paciente",
+      title: "No se pudieron cargar los datos del paciente",
+      description: "Revisa tu conexión e intenta abrirlo de nuevo desde la lista.",
       variant: "destructive",
     });
     navigate('/');
@@ -47,8 +47,8 @@ const PatientDetail = () => {
   useEffect(() => {
     if (!consultationsError) return;
     toast({
-      title: "Error",
-      description: "No se pudo cargar las consultas",
+      title: "No se pudieron cargar las consultas",
+      description: "Revisa tu conexión y recarga la página.",
       variant: "destructive",
     });
   }, [consultationsError, toast]);
@@ -83,8 +83,8 @@ const PatientDetail = () => {
       onError: (error) => {
         console.error('Error eliminando paciente:', error);
         toast({
-          title: "Error",
-          description: errorMessage(error, "Error al eliminar el paciente"),
+          title: "No se pudo eliminar el paciente",
+          description: "Revisa tu conexión e intenta de nuevo. No se borró ningún dato.",
           variant: "destructive",
         });
       },
