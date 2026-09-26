@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  // Filtros de la lista de la que se vino (ver PatientList), para volver con los mismos
+  const listSearch = (useLocation().state as { listSearch?: string } | null)?.listSearch ?? '';
   const { toast } = useToast();
   const { data: patient, isPending: loading, isError: patientError } = usePatient(id);
   const { data: consultations = [], isPending: consultationsLoading, isError: consultationsError } = useConsultations(id);
@@ -125,7 +127,7 @@ const PatientDetail = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/">Pacientes</Link>
+                <Link to={{ pathname: '/', search: listSearch }}>Pacientes</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

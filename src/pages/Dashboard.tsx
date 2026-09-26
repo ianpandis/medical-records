@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { usePatients } from '@/hooks/usePatientData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,12 +16,18 @@ import { LOCALIDADES, OBRAS_SOCIALES } from '@/lib/patient';
 // Radix Select no admite value=""; usamos un centinela para "todas"
 const ALL = 'all';
 
+// Valor de la URL solo si es una opción válida (un ?obra= manual inválido no filtra todo a cero)
+const oneOf = (options: readonly string[], value: string | null) =>
+  value && options.includes(value) ? value : '';
+
 const Dashboard = () => {
   const { toast } = useToast();
   const { data: patients = [], isPending: loading, isError } = usePatients();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [localidadFilter, setLocalidadFilter] = useState<string>('');
-  const [obraSocialFilter, setObraSocialFilter] = useState<string>('');
+  // Filtros en la URL (?q=&localidad=&obra=): sobreviven a entrar a un paciente y volver
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchTerm = searchParams.get('q') ?? '';
+  const localidadFilter = oneOf(LOCALIDADES, searchParams.get('localidad'));
+  const obraSocialFilter = oneOf(OBRAS_SOCIALES, searchParams.get('obra'));
   const [showAddPatient, setShowAddPatient] = useState(false);
 
   useEffect(() => {
@@ -48,6 +55,18 @@ const Dashboard = () => {
     
     return matchesSearch && matchesLocalidad && matchesObraSocial;
   });
+
+  // replace al tipear para no llenar el historial con cada tecla
+  const setFilters = (changes: Partial<Record<'q' | 'localidad' | 'obra', string>>, { replace = false } = {}) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [key, value] of Object.entries(changes)) {
+        if (value) next.set(key, value);
+        else next.delete(key);
+      }
+      return next;
+    }, { replace });
+  };
 
   const handlePatientAdded = () => {
     setShowAddPatient(false);
@@ -110,7 +129,7 @@ const Dashboard = () => {
                 aria-label="Buscar pacientes"
                 placeholder="Buscar por nombre o documento…"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setFilters({ q: e.target.value }, { replace: true })}
                 className="pl-9"
                 autoComplete="off"
                 spellCheck={false}
@@ -119,7 +138,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-2 gap-3 md:flex">
               <Select
                 value={localidadFilter || ALL}
-                onValueChange={(value) => setLocalidadFilter(value === ALL ? '' : value)}
+                onValueChange={(value) => setFilters({ localidad: value === ALL ? '' : value })}
               >
                 <SelectTrigger aria-label="Filtrar por localidad" className="min-w-0 md:w-56">
                   <SelectValue />
@@ -133,7 +152,7 @@ const Dashboard = () => {
               </Select>
               <Select
                 value={obraSocialFilter || ALL}
-                onValueChange={(value) => setObraSocialFilter(value === ALL ? '' : value)}
+                onValueChange={(value) => setFilters({ obra: value === ALL ? '' : value })}
               >
                 <SelectTrigger aria-label="Filtrar por obra social" className="min-w-0 md:w-56">
                   <SelectValue />
@@ -149,11 +168,7 @@ const Dashboard = () => {
             {hasFilters && (
               <Button
                 variant="ghost"
-                onClick={() => {
-                  setSearchTerm('');
-                  setLocalidadFilter('');
-                  setObraSocialFilter('');
-                }}
+                onClick={() => setFilters({ q: '', localidad: '', obra: '' })}
                 className="self-start md:self-auto"
               >
                 <X aria-hidden="true" />

@@ -21,6 +21,34 @@ test.describe('Dashboard', () => {
     await expect(app.getByText(`${TOTAL_PATIENTS} pacientes`, { exact: true })).toBeVisible();
   });
 
+  test('los filtros viven en la URL y sobreviven a entrar a un paciente', async ({ app }) => {
+    await app.goto('/?obra=Pami&localidad=Pilar');
+    await expect(app.getByRole('combobox', { name: 'Filtrar por obra social' })).toHaveText('Pami');
+    await expect(app.getByRole('combobox', { name: 'Filtrar por localidad' })).toHaveText('Pilar');
+
+    await app.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('aguirre');
+    await expect(app).toHaveURL(/q=aguirre/);
+    await expect(app.getByText(`1 de ${TOTAL_PATIENTS} pacientes`)).toBeVisible();
+
+    // Por el breadcrumb
+    await app.getByRole('link', { name: /Aguirre Marta/ }).first().click();
+    await expect(app.getByRole('heading', { name: 'Aguirre Marta', level: 1 })).toBeVisible();
+    await app.getByRole('navigation', { name: 'breadcrumb' }).getByRole('link', { name: 'Pacientes' }).click();
+    await expect(app.getByRole('searchbox', { name: 'Buscar pacientes' })).toHaveValue('aguirre');
+    await expect(app.getByText(`1 de ${TOTAL_PATIENTS} pacientes`)).toBeVisible();
+
+    // Y con el botón atrás del navegador
+    await app.getByRole('link', { name: /Aguirre Marta/ }).first().click();
+    await expect(app.getByRole('heading', { name: 'Aguirre Marta', level: 1 })).toBeVisible();
+    await app.goBack();
+    await expect(app.getByRole('searchbox', { name: 'Buscar pacientes' })).toHaveValue('aguirre');
+  });
+
+  test('un valor inválido en la URL no filtra', async ({ app }) => {
+    await app.goto('/?obra=Inexistente');
+    await expect(app.getByText(`${TOTAL_PATIENTS} pacientes`, { exact: true })).toBeVisible();
+  });
+
   test('el alta valida campos requeridos e identificadores', async ({ app }) => {
     await app.goto('/');
     await app.getByRole('button', { name: 'Agregar paciente' }).click();
@@ -49,7 +77,7 @@ test.describe('Detalle de paciente', () => {
 
   test('el form de edición conserva los ceros a la izquierda', async ({ app }) => {
     await app.goto(`/patient/${PACIENTE.id}`);
-    await app.getByRole('button', { name: 'Editar' }).click();
+    await app.getByRole('button', { name: 'Editar', exact: true }).click();
     const dialog = app.getByRole('dialog', { name: 'Editar paciente' });
     await expect(dialog.getByLabel('Número de trámite')).toHaveValue(PACIENTE.numero_tramite);
     await expect(dialog.getByLabel('Número de documento')).toHaveValue(PACIENTE.documento);

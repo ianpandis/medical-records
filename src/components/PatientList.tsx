@@ -2,7 +2,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChevronRight, SearchX } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ObraSocialBadge } from '@/components/ObraSocialBadge';
 import { EmptyValue } from '@/components/EmptyValue';
 import { calcularEdad } from '@/lib/patient';
@@ -18,6 +18,9 @@ const documentoLabel = (patient: Patient) =>
 
 export const PatientList = ({ patients, loading }: PatientListProps) => {
   const navigate = useNavigate();
+  // El detalle usa esto para volver a la lista con los mismos filtros
+  const { search } = useLocation();
+  const linkState = { listSearch: search };
 
   if (loading) {
     return (
@@ -70,12 +73,13 @@ export const PatientList = ({ patients, loading }: PatientListProps) => {
             {patients.map((patient) => (
               <TableRow
                 key={patient.id}
-                onClick={() => navigate(`/patient/${patient.id}`)}
+                onClick={() => navigate(`/patient/${patient.id}`, { state: linkState })}
                 className="group cursor-pointer"
               >
                 <TableCell className="py-3 pl-5">
                   <Link
                     to={`/patient/${patient.id}`}
+                    state={linkState}
                     onClick={(e) => e.stopPropagation()}
                     className="font-medium outline-none focus-visible:underline focus-visible:decoration-primary focus-visible:decoration-2 focus-visible:underline-offset-4"
                   >
@@ -114,6 +118,7 @@ export const PatientList = ({ patients, loading }: PatientListProps) => {
             <li key={patient.id}>
               <Link
                 to={`/patient/${patient.id}`}
+                state={linkState}
                 className="block rounded-xl border bg-card p-4 outline-none transition-colors active:bg-muted/60 focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex items-start justify-between gap-3">
