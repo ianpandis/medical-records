@@ -41,6 +41,11 @@ const AuthPage = () => {
                 button: {
                   background: 'hsl(var(--primary))',
                   color: 'hsl(var(--primary-foreground))',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  fontFamily: 'inherit',
+                  fontWeight: 500,
+                  minHeight: '44px',
                 },
                 anchor: {
                   color: 'hsl(var(--primary))',
