@@ -1,11 +1,9 @@
 import { test as base, expect, type Page } from '@playwright/test';
+import { E2E_STORAGE_KEY as STORAGE_KEY, E2E_SUPABASE_URL as SUPABASE_URL } from './env';
 
 // Sesión y datos simulados: no hay bypass de auth en el código de la app.
 // supabase.auth.getSession() acepta la sesión guardada en localStorage sin ir al servidor
 // y todas las requests a Supabase se responden acá (cualquier escritura se rechaza).
-
-const SUPABASE_URL = 'https://xyxtdvyrzsiwgqquroqm.supabase.co';
-const STORAGE_KEY = 'sb-xyxtdvyrzsiwgqquroqm-auth-token';
 
 const USER = {
   id: '00000000-0000-4000-8000-000000000001',
