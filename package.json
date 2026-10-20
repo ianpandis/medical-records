@@ -1,7 +1,17 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "health-scribe-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Registro de pacientes y consultas médicas con historia clínica en PDF (React + Supabase)",
+  "author": "Ian Pandis",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianpandis/health-scribe-app.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +19,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
