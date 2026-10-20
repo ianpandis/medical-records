@@ -27,3 +27,16 @@ dist-ssr
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Variables de entorno (nunca commitear credenciales)
+.env
+.env.*
+!.env.example
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+
+# Notas internas (contienen detalles de la base de producción)
+Proximos_pasos.md
+NEXT_STEPS_PLAN.md
