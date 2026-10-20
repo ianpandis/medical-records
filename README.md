@@ -75,7 +75,7 @@ Es una SPA estática: no hay un backend propio. El navegador habla directamente 
                                                   └──────────────────────────────┘
 ```
 
-- Cada fila de `patients`, `consultas` y `profiles` tiene un `user_id`. Las políticas RLS permiten leer y escribir solo las filas donde `auth.uid() = user_id`. Aunque dos profesionales usen la misma instancia, ninguno ve los datos del otro.
+- Cada fila de `patients` y `consultas` tiene un `user_id`, y cada usuario tiene su perfil en `users` (lo crea un trigger al registrarse). Las políticas RLS permiten leer y escribir solo las filas donde `auth.uid() = user_id`, y una consulta solo puede asociarse a un paciente propio. Aunque dos profesionales usen la misma instancia, ninguno ve los datos del otro.
 - La clave publishable (anon) está pensada para ir en el frontend: por sí sola no da acceso a nada que RLS no permita.
 - **Nunca pongas la clave `service_role` (o una secret key) en el frontend ni en variables `VITE_*`**: esa clave saltea RLS y daría acceso a todos los datos.
 
@@ -124,7 +124,7 @@ npx supabase db push
 
 **Opción B — SQL Editor**
 
-En el dashboard de Supabase, abrí **SQL Editor** y ejecutá el contenido de cada archivo de `supabase/migrations/`, uno por uno, **en orden por nombre** (el nombre empieza con la fecha).
+En el dashboard de Supabase, abrí **SQL Editor** y ejecutá el contenido de cada archivo de `supabase/migrations/`, uno por uno, **en orden por nombre** (el nombre empieza con la fecha). Hoy es un solo archivo con el schema completo. La carpeta `supabase/migrations_legacy/` es solo historial: no la ejecutes.
 
 ### 4. Configurar el login con Google
 

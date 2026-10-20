@@ -14,9 +14,7 @@ export interface Patient {
   telefono: string | null;
   email: string | null;
   direccion: string | null;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
+  user_id: string | null;
 }
 
 export interface Consultation {
@@ -25,8 +23,7 @@ export interface Consultation {
   fecha: string;
   notas: string;
   tipo: 'Primer Consulta' | 'Segunda Consulta' | 'Domicilio' | 'Espontanea' | null;
-  created_at: string;
-  updated_at: string;
+  user_id: string;
 }
 
 // Función para calcular la edad a partir de la fecha de nacimiento
@@ -44,8 +41,8 @@ export function calcularEdad(fechaNacimiento: string): number {
 }
 
 // Documento, trámite y afiliado son texto (conservan ceros a la izquierda).
-// Antes de la migración 20260926024457 la base los devolvía como number;
-// se siguen normalizando acá para que el resto de la app trabaje siempre con string.
+// Bases creadas antes de que fueran texto los devuelven como number;
+// se normalizan acá para que el resto de la app trabaje siempre con string.
 export function toPatient(row: Record<string, unknown>): Patient {
   const asText = (value: unknown) => (value === null || value === undefined ? null : String(value));
   return {
