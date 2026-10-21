@@ -20,6 +20,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
+    "screenshots": "SCREENSHOTS=1 playwright test e2e/screenshots.spec.ts",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json && tsc -p tsconfig.e2e.json"
   },
   "dependencies": {

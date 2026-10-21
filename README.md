@@ -1,5 +1,8 @@
 # Medical Records — Consultas médicas
 
+[![CI](https://github.com/ianpandis/medical-records/actions/workflows/ci.yml/badge.svg)](https://github.com/ianpandis/medical-records/actions/workflows/ci.yml)
+[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
+
 > **English:** A small web app for doctors to keep a patient registry and consultation notes, and export each patient's clinical history as a PDF (React + Vite + Supabase, Spanish UI).
 
 Aplicación web para que un profesional de la salud lleve el **registro de sus pacientes y de sus consultas**, y descargue la **historia clínica de cada paciente en PDF**. La interfaz está en español (Argentina), se ingresa con Google y cada usuario ve solamente sus propios datos.
@@ -46,7 +49,19 @@ Aplicación web para que un profesional de la salud lleve el **registro de sus p
 
 ## Capturas
 
-_Próximamente._
+Todas con datos ficticios.
+
+![Listado de pacientes](docs/screenshots/listado.png)
+
+| Detalle del paciente | Modo oscuro |
+| --- | --- |
+| ![Detalle del paciente con sus consultas](docs/screenshots/detalle.png) | ![Detalle del paciente en modo oscuro](docs/screenshots/detalle-oscuro.png) |
+
+| Alta de paciente | Celular |
+| --- | --- |
+| ![Formulario de alta de paciente](docs/screenshots/alta.png) | <img src="docs/screenshots/listado-mobile.png" alt="Listado de pacientes en el celular" width="260"> <img src="docs/screenshots/detalle-mobile.png" alt="Detalle del paciente en el celular" width="260"> |
+
+Se regeneran con `npm run screenshots`, que usa el mismo Supabase simulado que los tests e2e.
 
 ## Stack
 
@@ -81,7 +96,7 @@ Es una SPA estática: no hay un backend propio. El navegador habla directamente 
 
 ## Requisitos
 
-- Node.js 20 o superior (y npm).
+- Node.js 20 o superior (recomendado 22, está en `.nvmrc`) y npm.
 - Una cuenta de [Supabase](https://supabase.com) (el plan gratuito alcanza) con un proyecto creado.
 - Un proyecto en [Google Cloud](https://console.cloud.google.com) para crear las credenciales OAuth.
 
@@ -167,8 +182,9 @@ Abrí <http://localhost:8080> e ingresá con Google.
 | `npm run build:dev` | Build en modo desarrollo |
 | `npm run preview` | Sirve el build de `dist/` para probarlo localmente |
 | `npm run lint` | ESLint |
-| `npm run typecheck` | Chequeo de tipos de TypeScript (sin generar archivos) |
+| `npm run typecheck` | Chequeo de tipos de TypeScript de la app, la config de Vite y los tests (sin generar archivos) |
 | `npm run test:e2e` | Tests end-to-end con Playwright |
+| `npm run screenshots` | Regenera las capturas de `docs/screenshots/` y `public/og-image.png` |
 
 ## Tests
 
@@ -203,8 +219,10 @@ En ambos casos:
 ## Estructura del proyecto
 
 ```
+├── .github/                  CI (GitHub Actions) y templates de issues
+├── docs/screenshots/         Capturas del README (datos ficticios)
 ├── e2e/                      Tests e2e (Playwright) con Supabase simulado
-├── public/                   Archivos estáticos (favicon, robots.txt)
+├── public/                   Archivos estáticos (favicon, robots.txt, og-image.png)
 ├── src/
 │   ├── components/           Componentes de la app (listas, formularios, shell)
 │   │   └── ui/               Componentes base de shadcn/ui
@@ -216,7 +234,8 @@ En ambos casos:
 │   ├── pages/                Auth, Dashboard, PatientDetail, NotFound
 │   └── App.tsx               Rutas y providers
 ├── supabase/
-│   └── migrations/           Esquema de la base y políticas RLS
+│   └── migrations/           Esquema de la base, políticas RLS y límites de tamaño
+├── vercel.json, netlify.toml Deploy: rewrite de SPA y headers de seguridad (CSP)
 └── .env.example              Variables de entorno necesarias
 ```
 
