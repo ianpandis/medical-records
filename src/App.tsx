@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import PatientDetail from "./pages/PatientDetail";
+import Listas from "./pages/Listas";
 import NotFound from "./pages/NotFound";
 import { AppShell } from "@/components/AppShell";
 import { Loader2 } from "lucide-react";
@@ -57,6 +58,7 @@ const App = () => (
               }>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/patient/:id" element={<PatientDetail />} />
+                <Route path="/listas" element={<Listas />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

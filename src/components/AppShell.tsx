@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LogOut, Users } from 'lucide-react';
+import { ListChecks, LogOut, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { BrandMark } from '@/components/BrandMark';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -56,6 +56,14 @@ const AppSidebar = () => {
                   <Link to="/" onClick={() => setOpenMobile(false)} aria-current={pathname === '/' ? 'page' : undefined}>
                     <Users />
                     <span>Pacientes</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === '/listas'} className="h-9">
+                  <Link to="/listas" onClick={() => setOpenMobile(false)} aria-current={pathname === '/listas' ? 'page' : undefined}>
+                    <ListChecks />
+                    <span>Listas</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

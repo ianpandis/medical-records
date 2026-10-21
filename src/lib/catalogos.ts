@@ -3,9 +3,9 @@
 // que exista en la lista del profesional y propaga los renombres.
 
 export const CATALOGOS = {
-  obras_sociales: { titulo: 'Obras sociales', singular: 'obra social' },
-  localidades: { titulo: 'Localidades', singular: 'localidad' },
-  tipos_consulta: { titulo: 'Tipos de consulta', singular: 'tipo de consulta' },
+  obras_sociales: { titulo: 'Obras sociales', singular: 'obra social', nueva: 'Nueva obra social', la: 'la obra social' },
+  localidades: { titulo: 'Localidades', singular: 'localidad', nueva: 'Nueva localidad', la: 'la localidad' },
+  tipos_consulta: { titulo: 'Tipos de consulta', singular: 'tipo de consulta', nueva: 'Nuevo tipo de consulta', la: 'el tipo de consulta' },
 } as const;
 
 export type Catalogo = keyof typeof CATALOGOS;
