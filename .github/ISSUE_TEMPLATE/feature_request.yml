@@ -1,0 +1,32 @@
+name: Proponer una mejora
+description: Una idea o funcionalidad nueva.
+title: "[Mejora]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        No incluyas datos reales de pacientes ni claves en la propuesta.
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué problema resuelve
+      description: Contá qué querés lograr o qué te cuesta hoy.
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta
+      description: Cómo te imaginás que funcione.
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+  - type: textarea
+    id: extra
+    attributes:
+      label: Contexto adicional
+      description: Capturas o bocetos (con datos ficticios), si cambia el esquema de la base, etc.

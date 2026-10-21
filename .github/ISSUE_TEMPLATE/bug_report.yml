@@ -1,0 +1,71 @@
+name: Reportar un bug
+description: Algo no funciona como debería.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el tiempo de reportarlo.
+
+        > [!CAUTION]
+        > **No pegues datos reales de pacientes** (nombres, DNI, diagnósticos, capturas con datos de la base) **ni claves** (`.env`, keys de Supabase, tokens). Si necesitás mostrar algo, usá datos ficticios o tapalos.
+        >
+        > Si es un problema de seguridad, **no abras un issue**: reportalo en privado desde [Report a vulnerability](https://github.com/ianpandis/medical-records/security/advisories/new).
+  - type: textarea
+    id: descripcion
+    attributes:
+      label: Qué pasa
+      description: Una descripción corta del problema.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Ir a '...'
+        2. Hacer clic en '...'
+        3. Ver el error
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperabas que pasara
+    validations:
+      required: true
+  - type: textarea
+    id: obtenido
+    attributes:
+      label: Qué pasó en cambio
+      description: Incluí mensajes de error o de la consola del navegador si los hay (sin datos reales).
+    validations:
+      required: true
+  - type: input
+    id: navegador
+    attributes:
+      label: Navegador y dispositivo
+      placeholder: "Ej.: Chrome 130 en Windows 11 / Safari en iPhone 15"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión o commit
+      description: Versión de `package.json`, tag o hash del commit que estás usando.
+      placeholder: "Ej.: 1.0.0 o 46656e2"
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Contexto adicional
+      description: Capturas (con datos ficticios), si lo desplegaste en algún hosting, cambios propios, etc.
+  - type: checkboxes
+    id: confirmacion
+    attributes:
+      label: Confirmación
+      options:
+        - label: Revisé que este reporte no incluye datos reales de pacientes ni claves.
+          required: true
