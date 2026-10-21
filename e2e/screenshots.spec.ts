@@ -77,6 +77,10 @@ test('escritorio', async ({ app }, testInfo) => {
   await app.getByRole('button', { name: 'Agregar paciente' }).click();
   await expect(app.getByRole('dialog', { name: 'Agregar nuevo paciente' })).toBeVisible();
   await app.screenshot({ path: `${DIR}/alta.png`, animations: 'disabled' });
+
+  await app.goto('/listas');
+  await expect(app.getByRole('list', { name: 'Obras sociales activas' })).toBeVisible();
+  await app.screenshot({ path: `${DIR}/listas.png`, animations: 'disabled' });
 });
 
 test('og:image', async ({ app }, testInfo) => {

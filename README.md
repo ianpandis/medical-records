@@ -34,8 +34,12 @@ Aplicación web para que un profesional de la salud lleve el **registro de sus p
 - Los filtros, el orden y la página quedan en la URL: podés recargar o compartir el link y ves lo mismo.
 
 **Consultas**
-- Registro de consultas por paciente con fecha, tipo (primera, segunda, domicilio, espontánea) y notas libres.
+- Registro de consultas por paciente con fecha, tipo y notas libres.
 - Edición y borrado de consultas.
+
+**Listas configurables**
+- Cada profesional arma sus propias listas de **obras sociales**, **localidades** y **tipos de consulta** desde la pantalla *Listas*: agregar, renombrar, reordenar, elegir el color del badge de cada obra social y archivar las que ya no usa.
+- Renombrar una opción la actualiza en todos los pacientes y consultas que la usan. Una opción en uso no se puede borrar: se archiva, deja de ofrecerse en los formularios y los registros la conservan.
 
 **Historia clínica en PDF**
 - Desde el detalle del paciente se descarga un PDF (A4) con sus datos y todas sus consultas. Se genera en el navegador; no se envía a ningún servidor.
@@ -60,6 +64,10 @@ Todas con datos ficticios.
 | Alta de paciente | Celular |
 | --- | --- |
 | ![Formulario de alta de paciente](docs/screenshots/alta.png) | <img src="docs/screenshots/listado-mobile.png" alt="Listado de pacientes en el celular" width="260"> <img src="docs/screenshots/detalle-mobile.png" alt="Detalle del paciente en el celular" width="260"> |
+
+| Listas configurables |
+| --- |
+| ![Pantalla de listas: obras sociales, localidades y tipos de consulta](docs/screenshots/listas.png) |
 
 Se regeneran con `npm run screenshots`, que usa el mismo Supabase simulado que los tests e2e.
 
@@ -86,11 +94,12 @@ Es una SPA estática: no hay un backend propio. El navegador habla directamente 
 │  Navegador (SPA React)   │ ───────────────────▶ │  Supabase                    │
 │  - React Query           │   clave publishable  │  - Auth (Google OAuth)       │
 │  - PDF generado acá      │ ◀─────────────────── │  - PostgreSQL + RLS          │
-└──────────────────────────┘                      │    patients / consultas      │
+└──────────────────────────┘                      │    patients / consultas /    │
+                                                  │    listas configurables      │
                                                   └──────────────────────────────┘
 ```
 
-- Cada fila de `patients` y `consultas` tiene un `user_id`, y cada usuario tiene su perfil en `users` (lo crea un trigger al registrarse). Las políticas RLS permiten leer y escribir solo las filas donde `auth.uid() = user_id`, y una consulta solo puede asociarse a un paciente propio. Aunque dos profesionales usen la misma instancia, ninguno ve los datos del otro.
+- Cada fila de `patients`, `consultas` y de las listas configurables (`obras_sociales`, `localidades`, `tipos_consulta`) tiene un `user_id`, y cada usuario tiene su perfil en `users` (lo crea un trigger al registrarse). Las políticas RLS permiten leer y escribir solo las filas donde `auth.uid() = user_id`, y una consulta solo puede asociarse a un paciente propio. Aunque dos profesionales usen la misma instancia, ninguno ve los datos del otro.
 - La clave publishable (anon) está pensada para ir en el frontend: por sí sola no da acceso a nada que RLS no permita.
 - **Nunca pongas la clave `service_role` (o una secret key) en el frontend ni en variables `VITE_*`**: esa clave saltea RLS y daría acceso a todos los datos.
 
@@ -139,7 +148,7 @@ npx supabase db push
 
 **Opción B — SQL Editor**
 
-En el dashboard de Supabase, abrí **SQL Editor** y ejecutá el contenido de cada archivo de `supabase/migrations/`, uno por uno, **en orden por nombre** (el nombre empieza con la fecha). Hoy es un solo archivo con el schema completo. La carpeta `supabase/migrations_legacy/` es solo historial: no la ejecutes.
+En el dashboard de Supabase, abrí **SQL Editor** y ejecutá el contenido de cada archivo de `supabase/migrations/`, uno por uno, **en orden por nombre** (el nombre empieza con la fecha). El primero tiene el schema completo y los siguientes son los cambios posteriores. La carpeta `supabase/migrations_legacy/` es solo historial: no la ejecutes.
 
 ### 4. Configurar el login con Google
 
@@ -162,6 +171,8 @@ npm run dev
 ```
 
 Abrí <http://localhost:8080> e ingresá con Google.
+
+Un usuario nuevo arranca con las listas de obras sociales, localidades y tipos de consulta **vacías**: cargalas desde **Listas** en el menú lateral antes de dar de alta pacientes.
 
 ### 6. Cerrar el registro
 
@@ -229,36 +240,27 @@ En ambos casos:
 │   ├── hooks/                Auth, datos de pacientes (React Query), formularios
 │   ├── integrations/supabase/ Cliente de Supabase y tipos de la base
 │   ├── lib/
-│   │   ├── patient.ts        Tipos, listas de valores, edad y orden del listado
+│   │   ├── patient.ts        Tipos, límites de texto, edad y orden del listado
+│   │   ├── catalogos.ts      Listas configurables: nombres, colores de badge y opciones de los selects
 │   │   └── historia-clinica-pdf.tsx  Generación del PDF
-│   ├── pages/                Auth, Dashboard, PatientDetail, NotFound
+│   ├── pages/                Auth, Dashboard, PatientDetail, Listas, NotFound
 │   └── App.tsx               Rutas y providers
 ├── supabase/
-│   └── migrations/           Esquema de la base, políticas RLS y límites de tamaño
+│   └── migrations/           Esquema de la base, políticas RLS, límites de tamaño y listas configurables
 ├── vercel.json, netlify.toml Deploy: rewrite de SPA y headers de seguridad (CSP)
 └── .env.example              Variables de entorno necesarias
 ```
 
 ## Personalización
 
-Las listas de **obras sociales**, **localidades** y **tipos de consulta** vienen pensadas para un consultorio puntual (zona norte del conurbano bonaerense). Para adaptarlas a tu caso tenés que cambiarlas **en dos lugares**, porque la base también las valida:
+Las listas de **obras sociales**, **localidades** y **tipos de consulta** se editan desde la app, en **Listas**: no hace falta tocar código ni la base. Cada profesional tiene las suyas.
 
-1. **En el código** — `src/lib/patient.ts`:
-   - `OBRAS_SOCIALES` y `LOCALIDADES` (y los tipos `obra_social` / `localidad` de la interfaz `Patient`).
-   - Los tipos de consulta: el tipo `tipo` de `Consultation`.
-   - En `src/components/ConsultationForm.tsx`: la lista `TIPOS_CONSULTA` y el `z.enum` del esquema de validación.
-   - `obraSocialTint`: el color del badge de cada obra social.
-2. **En la base** — las columnas `obra_social` y `localidad` de `patients` y `tipo` de `consultas` tienen restricciones `CHECK` con los valores permitidos. Creá una migración nueva que las reemplace, por ejemplo:
+Por dentro, cada lista es una tabla (`obras_sociales`, `localidades`, `tipos_consulta`) con RLS por usuario. `patients.obra_social`, `patients.localidad` y `consultas.tipo` guardan el nombre de la opción y tienen una FK compuesta `(user_id, nombre)` hacia su lista, con `ON UPDATE CASCADE`: la base rechaza valores que no estén en la lista del profesional y propaga los renombres. Ver `supabase/migrations/20261021000000_listas_configurables.sql`.
 
-   ```sql
-   -- Buscá el nombre real de la restricción en Table Editor o con \d patients
-   ALTER TABLE public.patients DROP CONSTRAINT patients_obra_social_check;
-   ALTER TABLE public.patients
-     ADD CONSTRAINT patients_obra_social_check
-     CHECK (obra_social IN ('OSDE', 'Swiss Medical', 'Particular') OR obra_social IS NULL);
-   ```
+Lo que sí es fijo en el código:
 
-   Si la base ya tiene datos, asegurate de que los valores existentes entren en la nueva lista antes de aplicar el cambio.
+- **Tipos de documento** (DNI, LE, LC): un `enum` de la base (`tipo_documento`) y `TIPOS_DOCUMENTO` en `src/lib/patient.ts`.
+- **Colores de los badges**: la paleta `TINTS` de `src/lib/catalogos.ts`, los tokens `--tint-*` de `src/index.css` y el `CHECK` de `obras_sociales.color`. Para sumar un color hay que cambiar los tres.
 
 Si cambiás el esquema, regenerá los tipos de `src/integrations/supabase/types.ts` con `npx supabase gen types typescript --linked`.
 
