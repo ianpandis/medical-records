@@ -185,19 +185,12 @@ Los tests **simulan Supabase** (sesión y respuestas de la API): no necesitan cr
 
 La app es una SPA estática: el build (`npm run build`) genera la carpeta `dist/`, que se puede servir desde cualquier hosting estático. Como usa rutas del lado del cliente (por ejemplo `/patient/:id`), el hosting tiene que devolver `index.html` para cualquier ruta.
 
-**Vercel** — creá un `vercel.json` en la raíz:
+El repo ya trae la configuración para **Vercel** (`vercel.json`) y **Netlify** (`netlify.toml`): redirección de todas las rutas a `index.html` y headers de seguridad (`Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options` y `Permissions-Policy`). La CSP solo permite conexiones al propio sitio, a Supabase (`*.supabase.co`) y a Google Fonts.
 
-```json
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
-```
-
-**Netlify** — creá `public/_redirects` con:
-
-```
-/*  /index.html  200
-```
+- Si usás un proyecto común de Supabase no hace falta tocar nada.
+- Si tu proyecto usa un dominio propio o sumás otro servicio externo (analytics, monitoreo de errores, imágenes de otro dominio), agregá ese dominio a la directiva que corresponda (`connect-src` para APIs y websockets, `img-src` para imágenes, `script-src` para scripts), con el mismo valor en los dos archivos.
+- Si modificás el script inline de `index.html` que aplica el tema, recalculá su hash `sha256-…` en la CSP; si no, el navegador lo bloquea.
+- Cualquier bloqueo aparece en la consola del navegador como un error de "Content Security Policy".
 
 En ambos casos:
 
