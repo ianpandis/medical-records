@@ -11,7 +11,9 @@ import { FormDialog } from '@/components/FormDialog';
 import { useToast } from '@/hooks/use-toast';
 import { PageContent, PageHeader } from '@/components/AppShell';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
-import { LOCALIDADES, OBRAS_SOCIALES, SORT_KEYS, sortPatients, type SortDir, type SortKey } from '@/lib/patient';
+import { SORT_KEYS, sortPatients, type SortDir, type SortKey } from '@/lib/patient';
+import { opcionesParaFiltro } from '@/lib/catalogos';
+import { useCatalogo } from '@/hooks/useCatalogos';
 import { ListPagination } from '@/components/ListPagination';
 
 // Radix Select no admite value=""; usamos un centinela para "todas"
@@ -29,8 +31,12 @@ const Dashboard = () => {
   // Filtros en la URL (?q=&localidad=&obra=): sobreviven a entrar a un paciente y volver
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('q') ?? '';
-  const localidadFilter = oneOf(LOCALIDADES, searchParams.get('localidad'));
-  const obraSocialFilter = oneOf(OBRAS_SOCIALES, searchParams.get('obra'));
+  const { data: localidadesCatalogo = [] } = useCatalogo('localidades');
+  const { data: obrasSocialesCatalogo = [] } = useCatalogo('obras_sociales');
+  const localidades = opcionesParaFiltro(localidadesCatalogo, patients.map((patient) => patient.localidad));
+  const obrasSociales = opcionesParaFiltro(obrasSocialesCatalogo, patients.map((patient) => patient.obra_social));
+  const localidadFilter = oneOf(localidades, searchParams.get('localidad'));
+  const obraSocialFilter = oneOf(obrasSociales, searchParams.get('obra'));
   const sortKey = (oneOf(SORT_KEYS, searchParams.get('orden')) || 'paciente') as SortKey;
   const sortDir: SortDir = searchParams.get('dir') === 'desc' ? 'desc' : 'asc';
   const [showAddPatient, setShowAddPatient] = useState(false);
@@ -168,7 +174,7 @@ const Dashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ALL}>Todas las localidades</SelectItem>
-                  {LOCALIDADES.map((localidad) => (
+                  {localidades.map((localidad) => (
                     <SelectItem key={localidad} value={localidad}>{localidad}</SelectItem>
                   ))}
                 </SelectContent>
@@ -182,7 +188,7 @@ const Dashboard = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ALL}>Todas las obras sociales</SelectItem>
-                  {OBRAS_SOCIALES.map((obraSocial) => (
+                  {obrasSociales.map((obraSocial) => (
                     <SelectItem key={obraSocial} value={obraSocial}>{obraSocial}</SelectItem>
                   ))}
                 </SelectContent>

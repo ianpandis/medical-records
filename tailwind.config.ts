@@ -65,7 +65,11 @@ export default {
 					peach: 'hsl(var(--tint-peach))',
 					'peach-foreground': 'hsl(var(--tint-peach-foreground))',
 					lavender: 'hsl(var(--tint-lavender))',
-					'lavender-foreground': 'hsl(var(--tint-lavender-foreground))'
+					'lavender-foreground': 'hsl(var(--tint-lavender-foreground))',
+					rose: 'hsl(var(--tint-rose))',
+					'rose-foreground': 'hsl(var(--tint-rose-foreground))',
+					lemon: 'hsl(var(--tint-lemon))',
+					'lemon-foreground': 'hsl(var(--tint-lemon-foreground))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',

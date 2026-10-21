@@ -45,9 +45,9 @@ test.describe('Dashboard', () => {
   });
 
   test('los filtros viven en la URL y sobreviven a entrar a un paciente', async ({ app }) => {
-    await app.goto('/?obra=Pami&localidad=Pilar');
-    await expect(app.getByRole('combobox', { name: 'Filtrar por obra social' })).toHaveText('Pami');
-    await expect(app.getByRole('combobox', { name: 'Filtrar por localidad' })).toHaveText('Pilar');
+    await app.goto('/?obra=OSDE&localidad=Belgrano');
+    await expect(app.getByRole('combobox', { name: 'Filtrar por obra social' })).toHaveText('OSDE');
+    await expect(app.getByRole('combobox', { name: 'Filtrar por localidad' })).toHaveText('Belgrano');
 
     await app.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('aguirre');
     await expect(app).toHaveURL(/q=aguirre/);

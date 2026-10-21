@@ -10,12 +10,13 @@ import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { maxTexto } from '@/lib/patient';
+import { MAX_NOMBRE_OPCION, opcionesParaSelect } from '@/lib/catalogos';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useReportDirty } from '@/hooks/use-dirty-form';
 import { useSaveConsultation } from '@/hooks/usePatientData';
-
-const TIPOS_CONSULTA = ['Primer Consulta', 'Segunda Consulta', 'Domicilio', 'Espontanea'] as const;
+import { useCatalogo } from '@/hooks/useCatalogos';
+import { ListaVaciaHint } from '@/components/ListaVaciaHint';
 
 // Radix Select no admite value=""; "Sin especificar" vuelve el campo a '' (el schema lo transforma a null)
 const NONE = '__none__';
@@ -23,7 +24,8 @@ const NONE = '__none__';
 const consultationSchema = z.object({
   fecha: z.string().min(1, 'Fecha es requerida'),
   notas: z.string().min(1, 'Notas son requeridas').max(...maxTexto('notas')),
-  tipo: z.enum(['Primer Consulta', 'Segunda Consulta', 'Domicilio', 'Espontanea']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
+  // Opción de la lista configurable; la base valida que exista en la lista del profesional
+  tipo: z.string().max(MAX_NOMBRE_OPCION).transform(val => val === '' ? undefined : val).optional(),
 });
 
 type ConsultationFormData = z.infer<typeof consultationSchema>;
@@ -40,6 +42,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
   const { toast } = useToast();
   const saveConsultation = useSaveConsultation(patientId, consultationId);
   const loading = saveConsultation.isPending;
+  const { data: tiposConsulta } = useCatalogo('tipos_consulta');
 
   const {
     register,
@@ -121,7 +124,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE} className="text-muted-foreground">Sin especificar</SelectItem>
-                {TIPOS_CONSULTA.map((tipo) => (
+                {opcionesParaSelect(tiposConsulta ?? [], initialData?.tipo).map((tipo) => (
                   <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
                 ))}
               </SelectContent>
@@ -131,6 +134,7 @@ export const ConsultationForm = ({ patientId, onSuccess, initialData, consultati
         {errors.tipo && (
           <p className="text-sm text-destructive">{errors.tipo.message}</p>
         )}
+        {tiposConsulta?.length === 0 && <ListaVaciaHint catalogo="tipos_consulta" />}
       </div>
 
       <div className="space-y-1.5">

@@ -9,11 +9,17 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO, maxTexto } from '@/lib/patient';
+import { SOLO_DIGITOS, TIPOS_DOCUMENTO, maxTexto } from '@/lib/patient';
+import { MAX_NOMBRE_OPCION, opcionesParaSelect } from '@/lib/catalogos';
+import { ListaVaciaHint } from '@/components/ListaVaciaHint';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useReportDirty } from '@/hooks/use-dirty-form';
 import { useSavePatient } from '@/hooks/usePatientData';
+import { useCatalogo } from '@/hooks/useCatalogos';
+
+// Opción de una lista configurable; la base valida que exista en la lista del profesional
+const opcionDeLista = z.string().max(MAX_NOMBRE_OPCION).transform(val => val === '' ? undefined : val).optional();
 
 const patientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(...maxTexto('nombre')),
@@ -23,8 +29,8 @@ const patientSchema = z.object({
   tipo_documento: z.enum(['DNI', 'LE', 'LC']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
   numero_tramite: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').max(...maxTexto('numero_tramite')).optional(),
   numero_afiliado: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').max(...maxTexto('numero_afiliado')).optional(),
-  obra_social: z.enum(['Pami', 'Ioma', 'Medife', 'Particular']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
-  localidad: z.enum(['Del Viso', 'Garin', 'Maquinista Savio', 'Pilar']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
+  obra_social: opcionDeLista,
+  localidad: opcionDeLista,
   phone: z.string().max(...maxTexto('telefono')).optional(),
   email: z.string().email('Email inválido').max(...maxTexto('email')).optional().or(z.literal('')),
   address: z.string().max(...maxTexto('direccion')).optional(),
@@ -43,6 +49,8 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
   const { toast } = useToast();
   const savePatient = useSavePatient(patientId);
   const loading = savePatient.isPending;
+  const { data: obrasSociales } = useCatalogo('obras_sociales');
+  const { data: localidades } = useCatalogo('localidades');
 
   const {
     register,
@@ -121,10 +129,11 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
             id="localidad"
             name="localidad"
             control={control}
-            options={LOCALIDADES}
+            options={opcionesParaSelect(localidades ?? [], initialData?.localidad)}
             placeholder="Seleccionar localidad"
             invalid={!!errors.localidad}
           />
+          {localidades?.length === 0 && <ListaVaciaHint catalogo="localidades" />}
         </Field>
       </FormSection>
 
@@ -164,10 +173,11 @@ export const PatientForm = ({ onSuccess, initialData, patientId }: PatientFormPr
             id="obra_social"
             name="obra_social"
             control={control}
-            options={OBRAS_SOCIALES}
+            options={opcionesParaSelect(obrasSociales ?? [], initialData?.obra_social)}
             placeholder="Seleccionar obra social"
             invalid={!!errors.obra_social}
           />
+          {obrasSociales?.length === 0 && <ListaVaciaHint catalogo="obras_sociales" />}
         </Field>
         <Field id="numero_afiliado" label="Número de afiliado" error={errors.numero_afiliado?.message}>
           <Input
@@ -309,3 +319,4 @@ const EnumSelect = ({
     )}
   />
 );
+

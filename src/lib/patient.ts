@@ -6,8 +6,9 @@ export interface Patient {
   tipo_documento: 'DNI' | 'LE' | 'LC' | null;
   numero_tramite: string | null;
   numero_afiliado: string | null;
-  obra_social: 'Pami' | 'Ioma' | 'Medife' | 'Particular' | null;
-  localidad: 'Del Viso' | 'Garin' | 'Maquinista Savio' | 'Pilar' | null;
+  // Nombre de una opción de las listas configurables (ver src/lib/catalogos.ts)
+  obra_social: string | null;
+  localidad: string | null;
   nombre: string;
   apellido: string;
   fecha_nacimiento: string | null;
@@ -22,7 +23,7 @@ export interface Consultation {
   patient_id: string;
   fecha: string;
   notas: string;
-  tipo: 'Primer Consulta' | 'Segunda Consulta' | 'Domicilio' | 'Espontanea' | null;
+  tipo: string | null;
   user_id: string;
 }
 
@@ -73,17 +74,7 @@ export const maxTexto = (campo: keyof typeof LIMITES) => [LIMITES[campo], excede
 // Solo dígitos (o vacío); se valida como texto para no perder ceros a la izquierda
 export const SOLO_DIGITOS = /^\d*$/;
 
-export const OBRAS_SOCIALES = ['Pami', 'Ioma', 'Medife', 'Particular'] as const;
-export const LOCALIDADES = ['Del Viso', 'Garin', 'Maquinista Savio', 'Pilar'] as const;
 export const TIPOS_DOCUMENTO = ['DNI', 'LE', 'LC'] as const;
-
-// Tint pastel por obra social (tokens --tint-* en index.css)
-export const obraSocialTint: Record<NonNullable<Patient['obra_social']>, string> = {
-  Pami: 'bg-tint-sky text-tint-sky-foreground',
-  Ioma: 'bg-tint-mint text-tint-mint-foreground',
-  Medife: 'bg-tint-peach text-tint-peach-foreground',
-  Particular: 'bg-tint-lavender text-tint-lavender-foreground',
-};
 
 // Orden del listado de pacientes
 export const SORT_KEYS = ['paciente', 'edad', 'obra'] as const;

@@ -54,6 +54,10 @@ Dirección visual (v2):
     --tint-peach-foreground: 24 75% 32%;
     --tint-lavender: 250 90% 95%;
     --tint-lavender-foreground: 250 55% 42%;
+    --tint-rose: 345 85% 94%;
+    --tint-rose-foreground: 345 60% 38%;
+    --tint-lemon: 50 90% 88%;
+    --tint-lemon-foreground: 38 80% 26%;
 
     --sidebar-background: 0 0% 100%;
 
@@ -113,6 +117,10 @@ Dirección visual (v2):
     --tint-peach-foreground: 28 85% 78%;
     --tint-lavender: 250 40% 22%;
     --tint-lavender-foreground: 250 90% 85%;
+    --tint-rose: 345 40% 20%;
+    --tint-rose-foreground: 345 85% 82%;
+    --tint-lemon: 45 45% 16%;
+    --tint-lemon-foreground: 48 85% 72%;
 
     --sidebar-background: 216 24% 9%;
     --sidebar-foreground: 210 15% 80%;

@@ -34,8 +34,28 @@ function fakeSession() {
   };
 }
 
-const OBRAS = ['Pami', 'Ioma', 'Medife', 'Particular', null] as const;
-const LOCALIDADES = ['Del Viso', 'Garin', 'Maquinista Savio', 'Pilar', null] as const;
+// Listas configurables (genéricas, no las de ningún consultorio real). Medicus está archivada
+// pero la usa un paciente: tiene que seguir apareciendo en el filtro y en su formulario
+const opciones = (nombres: string[], extra: (i: number) => Record<string, unknown> = () => ({})) =>
+  nombres.map((nombre, i) => ({
+    id: `30000000-0000-4000-8000-${String(i).padStart(12, '0')}`,
+    user_id: USER.id,
+    nombre,
+    orden: i + 1,
+    activo: true,
+    created_at: '2025-01-01T00:00:00Z',
+    ...extra(i),
+  }));
+const TINTS = ['sky', 'mint', 'peach', 'lavender', 'rose'];
+export const CATALOGOS: Record<string, Record<string, unknown>[]> = {
+  obras_sociales: opciones(['OSDE', 'Swiss Medical', 'Galeno', 'Particular', 'Medicus'], (i) => ({ color: TINTS[i], activo: i < 4 })),
+  localidades: opciones(['Belgrano', 'Caballito', 'Flores', 'Palermo']),
+  tipos_consulta: opciones(['Primera vez', 'Control', 'Domicilio', 'Urgencia']),
+};
+export const OBRA_ARCHIVADA = 'Medicus';
+
+const OBRAS = ['OSDE', 'Swiss Medical', 'Galeno', 'Particular', null] as const;
+const LOCALIDADES = ['Belgrano', 'Caballito', 'Flores', 'Palermo', null] as const;
 const APELLIDOS = ['Acosta', 'Benítez', 'Castro', 'Díaz', 'Fernández', 'Gómez', 'Herrera', 'Ibáñez', 'Juárez', 'López', 'Medina', 'Núñez', 'Ortiz', 'Pérez', 'Quiroga', 'Romero', 'Sosa', 'Torres', 'Vega', 'Zárate'];
 const NOMBRES = ['Ana', 'Bruno', 'Carla', 'Diego', 'Elena', 'Facundo', 'Gabriela', 'Hugo'];
 
@@ -50,12 +70,12 @@ export const PACIENTE = {
   tipo_documento: 'DNI',
   numero_tramite: '00612345987',
   numero_afiliado: '15012345678900',
-  obra_social: 'Pami',
-  localidad: 'Pilar',
+  obra_social: 'OSDE',
+  localidad: 'Belgrano',
   fecha_nacimiento: '1948-03-12',
   telefono: '11 5555-0101',
   email: 'marta@example.com',
-  direccion: 'Av. Tratado del Pilar 123',
+  direccion: 'Av. Cabildo 1234',
 };
 
 function buildPatients() {
@@ -69,7 +89,7 @@ function buildPatients() {
       tipo_documento: i % 9 === 0 ? null : 'DNI',
       numero_tramite: null,
       numero_afiliado: null,
-      obra_social: OBRAS[i % OBRAS.length],
+      obra_social: i === 1 ? OBRA_ARCHIVADA : OBRAS[i % OBRAS.length],
       localidad: LOCALIDADES[i % LOCALIDADES.length],
       fecha_nacimiento: i % 11 === 0 ? null : `${1940 + (i % 60)}-${String((i % 12) + 1).padStart(2, '0')}-15`,
       telefono: i % 3 === 0 ? null : `11 5555-${String(1000 + i)}`,
@@ -86,8 +106,8 @@ function buildPatients() {
 const PATIENTS = buildPatients();
 
 const CONSULTAS = [
-  { id: 'c1', fecha: '2026-09-10', tipo: 'Segunda Consulta', notas: 'Control de presión arterial. TA 130/80.\nContinúa con enalapril 10 mg.' },
-  { id: 'c2', fecha: '2026-08-02', tipo: 'Primer Consulta', notas: 'Consulta por cefalea tensional de dos semanas de evolución.' },
+  { id: 'c1', fecha: '2026-09-10', tipo: 'Control', notas: 'Control de presión arterial. TA 130/80.\nContinúa con enalapril 10 mg.' },
+  { id: 'c2', fecha: '2026-08-02', tipo: 'Primera vez', notas: 'Consulta por cefalea tensional de dos semanas de evolución.' },
 ].map((c) => ({ ...c, patient_id: PACIENTE.id, user_id: USER.id, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' }));
 
 async function mockSupabase(page: Page) {
@@ -115,6 +135,8 @@ async function mockSupabase(page: Page) {
       rows = id ? PATIENTS.filter((p) => p.id === id) : PATIENTS;
     } else if (url.pathname === '/rest/v1/consultas') {
       rows = CONSULTAS.filter((c) => c.patient_id === eq('patient_id'));
+    } else if (url.pathname.replace('/rest/v1/', '') in CATALOGOS) {
+      rows = CATALOGOS[url.pathname.replace('/rest/v1/', '')];
     }
     if (!rows) return route.fulfill({ status: 404, json: { message: 'No simulado' } });
 
