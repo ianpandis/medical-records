@@ -1,4 +1,27 @@
 import { test, expect, expectNoHorizontalOverflow, PACIENTE, TOTAL_PATIENTS } from './fixtures';
+import { E2E_SUPABASE_URL } from './env';
+
+test.describe('Login', () => {
+  // Usa `page` y no `app`: sin sesión simulada
+  test('sin sesión redirige al login y el botón va al authorize de Google', async ({ page }) => {
+    await page.route(
+      (url) => url.href.startsWith(`${E2E_SUPABASE_URL}/auth/v1/authorize`),
+      (route) => route.fulfill({ contentType: 'text/html', body: '<p>Google</p>' }),
+    );
+    await page.goto('/');
+    await expect(page).toHaveURL('/auth');
+    const boton = page.getByRole('button', { name: 'Continuar con Google' });
+    await expect(boton).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    const origin = new URL(page.url()).origin;
+    const authorize = page.waitForRequest((r) => r.url().startsWith(`${E2E_SUPABASE_URL}/auth/v1/authorize`));
+    await boton.click();
+    const url = new URL((await authorize).url());
+    expect(url.searchParams.get('provider')).toBe('google');
+    expect(url.searchParams.get('redirect_to')).toBe(`${origin}/`);
+  });
+});
 
 test.describe('Dashboard', () => {
   test('carga la lista de pacientes', async ({ app }) => {
