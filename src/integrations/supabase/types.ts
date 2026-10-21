@@ -48,7 +48,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "consultas_tipo_fkey"
+            columns: ["user_id", "tipo"]
+            isOneToOne: false
+            referencedRelation: "tipos_consulta"
+            referencedColumns: ["user_id", "nombre"]
+          },
+          {
             foreignKeyName: "consultas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      localidades: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          nombre: string
+          orden: number
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          nombre: string
+          orden?: number
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "localidades_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obras_sociales: {
+        Row: {
+          activo: boolean
+          color: string
+          created_at: string
+          id: string
+          nombre: string
+          orden: number
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          color?: string
+          created_at?: string
+          id?: string
+          nombre: string
+          orden?: number
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          color?: string
+          created_at?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obras_sociales_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -107,7 +187,56 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "patients_localidad_fkey"
+            columns: ["user_id", "localidad"]
+            isOneToOne: false
+            referencedRelation: "localidades"
+            referencedColumns: ["user_id", "nombre"]
+          },
+          {
+            foreignKeyName: "patients_obra_social_fkey"
+            columns: ["user_id", "obra_social"]
+            isOneToOne: false
+            referencedRelation: "obras_sociales"
+            referencedColumns: ["user_id", "nombre"]
+          },
+          {
             foreignKeyName: "patients_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tipos_consulta: {
+        Row: {
+          activo: boolean
+          created_at: string
+          id: string
+          nombre: string
+          orden: number
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          nombre: string
+          orden?: number
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tipos_consulta_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
