@@ -1,4 +1,4 @@
-# Health Scribe — Consultas médicas
+# Medical Records — Consultas médicas
 
 > **English:** A small web app for doctors to keep a patient registry and consultation notes, and export each patient's clinical history as a PDF (React + Vite + Supabase, Spanish UI).
 
@@ -90,8 +90,8 @@ Es una SPA estática: no hay un backend propio. El navegador habla directamente 
 ### 1. Clonar e instalar dependencias
 
 ```bash
-git clone https://github.com/ianpandis/health-scribe-app.git
-cd health-scribe-app
+git clone https://github.com/ianpandis/medical-records.git
+cd medical-records
 npm install
 ```
 

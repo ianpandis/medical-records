@@ -1,5 +1,5 @@
 {
-  "name": "health-scribe-app",
+  "name": "medical-records",
   "private": true,
   "version": "1.0.0",
   "description": "Registro de pacientes y consultas médicas con historia clínica en PDF (React + Supabase)",
@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ianpandis/health-scribe-app.git"
+    "url": "git+https://github.com/ianpandis/medical-records.git"
   },
   "engines": {
     "node": ">=20"

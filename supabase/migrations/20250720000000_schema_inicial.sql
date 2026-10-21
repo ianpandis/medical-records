@@ -1,4 +1,4 @@
--- Schema inicial de health-scribe-app.
+-- Schema inicial de medical-records.
 --
 -- Reproduce la estructura de la base en uso (tablas, columnas, restricciones y el
 -- trigger de alta de usuarios) en un solo archivo, para crear un proyecto nuevo con
