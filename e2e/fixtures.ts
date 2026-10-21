@@ -79,7 +79,7 @@ function buildPatients() {
   }
   rows.push(PACIENTE);
   return rows
-    .map((row) => ({ ...row, user_id: USER.id, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' }))
+    .map((row): Record<string, unknown> => ({ ...row, user_id: USER.id, created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' }))
     .sort((a, b) => String(a.apellido).localeCompare(String(b.apellido)));
 }
 
