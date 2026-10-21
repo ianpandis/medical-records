@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { maxTexto } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useReportDirty } from '@/hooks/use-dirty-form';
@@ -21,7 +22,7 @@ const NONE = '__none__';
 
 const consultationSchema = z.object({
   fecha: z.string().min(1, 'Fecha es requerida'),
-  notas: z.string().min(1, 'Notas son requeridas'),
+  notas: z.string().min(1, 'Notas son requeridas').max(...maxTexto('notas')),
   tipo: z.enum(['Primer Consulta', 'Segunda Consulta', 'Domicilio', 'Espontanea']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
 });
 

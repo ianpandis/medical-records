@@ -139,6 +139,17 @@ test.describe('Dashboard', () => {
     await expect(dialog.getByText('Solo números, sin puntos ni espacios')).toBeVisible();
     await expect(dialog.getByLabel('Apellido')).toHaveAttribute('aria-invalid', 'true');
   });
+
+  test('el alta limita el largo de los textos', async ({ app }) => {
+    await app.goto('/');
+    await app.getByRole('button', { name: 'Agregar paciente' }).click();
+    const dialog = app.getByRole('dialog', { name: 'Agregar nuevo paciente' });
+
+    await dialog.getByLabel('Apellido').fill('a'.repeat(101));
+    await dialog.getByRole('button', { name: 'Agregar paciente' }).click();
+
+    await expect(dialog.getByText('Máximo 100 caracteres')).toBeVisible();
+  });
 });
 
 test.describe('Detalle de paciente', () => {

@@ -53,6 +53,23 @@ export function toPatient(row: Record<string, unknown>): Patient {
   };
 }
 
+// Largo máximo de los textos libres; coincide con los CHECK de
+// supabase/migrations/20261020000000_limites_de_tamano.sql
+export const LIMITES = {
+  nombre: 100,
+  apellido: 100,
+  documento: 20,
+  numero_tramite: 20,
+  numero_afiliado: 30,
+  telefono: 50,
+  email: 254,
+  direccion: 500,
+  notas: 20000,
+} as const;
+
+const excede = (max: number) => `Máximo ${max.toLocaleString('es-AR')} caracteres`;
+export const maxTexto = (campo: keyof typeof LIMITES) => [LIMITES[campo], excede(LIMITES[campo])] as const;
+
 // Solo dígitos (o vacío); se valida como texto para no perder ceros a la izquierda
 export const SOLO_DIGITOS = /^\d*$/;
 

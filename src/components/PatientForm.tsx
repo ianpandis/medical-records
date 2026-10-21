@@ -9,25 +9,25 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO } from '@/lib/patient';
+import { LOCALIDADES, OBRAS_SOCIALES, SOLO_DIGITOS, TIPOS_DOCUMENTO, maxTexto } from '@/lib/patient';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useReportDirty } from '@/hooks/use-dirty-form';
 import { useSavePatient } from '@/hooks/usePatientData';
 
 const patientSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  lastname: z.string().min(1, 'El apellido es requerido'),
+  name: z.string().min(1, 'El nombre es requerido').max(...maxTexto('nombre')),
+  lastname: z.string().min(1, 'El apellido es requerido').max(...maxTexto('apellido')),
   date_of_birth: z.string().optional(),
-  document: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').optional(),
+  document: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').max(...maxTexto('documento')).optional(),
   tipo_documento: z.enum(['DNI', 'LE', 'LC']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
-  numero_tramite: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').optional(),
-  numero_afiliado: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').optional(),
+  numero_tramite: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').max(...maxTexto('numero_tramite')).optional(),
+  numero_afiliado: z.string().trim().regex(SOLO_DIGITOS, 'Solo números, sin puntos ni espacios').max(...maxTexto('numero_afiliado')).optional(),
   obra_social: z.enum(['Pami', 'Ioma', 'Medife', 'Particular']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
   localidad: z.enum(['Del Viso', 'Garin', 'Maquinista Savio', 'Pilar']).or(z.literal('')).transform(val => val === '' ? undefined : val).optional(),
-  phone: z.string().optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  address: z.string().optional(),
+  phone: z.string().max(...maxTexto('telefono')).optional(),
+  email: z.string().email('Email inválido').max(...maxTexto('email')).optional().or(z.literal('')),
+  address: z.string().max(...maxTexto('direccion')).optional(),
 });
 
 type PatientFormData = z.infer<typeof patientSchema>;
